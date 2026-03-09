@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-bg: #0a0a0f;
+  --color-card: #16161e;
+  --color-input: #1c1c26;
+  
+  /* Passion & Motivation Palette */
+  --color-passion: #ff2e63;
+  --color-energy: #ff9a00;
+  --color-focus: #00d2ff;
+  --color-power: #9d50bb;
+  
+  --color-accent-1: #6366f1; /* Pull - Indigo */
+  --color-accent-2: #ff2e63; /* Push - Passion Red */
+  --color-accent-3: #00f260; /* Legs Heavy - Energy Green */
+  --color-accent-4: #f7971e; /* Arms - Motivation Orange */
+  --color-accent-5: #9d50bb; /* Legs Volume - Power Purple */
+}
+
+@layer base {
+  body {
+    @apply bg-bg text-slate-100 font-sans antialiased;
+    background-image: 
+      radial-gradient(circle at 0% 0%, rgba(255, 46, 99, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 100% 100%, rgba(0, 210, 255, 0.05) 0%, transparent 50%);
+    background-attachment: fixed;
+  }
+}
+
+.glass {
+  @apply bg-white/5 backdrop-blur-lg border border-white/10;
+}
+
+.glow-passion {
+  box-shadow: 0 0 20px rgba(255, 46, 99, 0.3);
+}
+
+.glow-energy {
+  box-shadow: 0 0 20px rgba(255, 154, 0, 0.3);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s infinite;
+}
