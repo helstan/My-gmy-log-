@@ -38,37 +38,37 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ history }) => {
             className="space-y-4"
           >
             <div className="flex items-center justify-between px-2">
-              <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest">
+              <h3 className="text-sm font-bold text-[var(--outline)] uppercase tracking-wider">
                 {new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
               </h3>
-              <span className="text-[10px] font-bold text-passion uppercase bg-passion/10 px-2 py-0.5 rounded-full">
+              <span className="text-[10px] font-bold text-[var(--primary)] uppercase bg-[var(--primary)]/10 px-2 py-0.5 rounded-full">
                 {selectedDateWorkouts.length} Session{selectedDateWorkouts.length !== 1 ? 's' : ''}
               </span>
             </div>
 
             {selectedDateWorkouts.length === 0 ? (
-              <div className="bg-card rounded-3xl p-8 border border-white/5 text-center">
-                <p className="text-slate-500 text-sm font-bold">No workouts recorded for this day.</p>
+              <div className="m3-card p-10 text-center border border-[var(--outline)]/10">
+                <p className="text-[var(--outline)] text-sm font-bold">No workouts recorded for this day.</p>
               </div>
             ) : (
               selectedDateWorkouts.map(workout => (
                 <div 
                   key={workout.id} 
-                  className="bg-card rounded-3xl overflow-hidden border border-white/5 shadow-2xl relative group"
+                  className="m3-card overflow-hidden group border border-[var(--outline)]/10"
                 >
                   <div className="p-6">
                     <div className="flex justify-between items-start mb-6">
                       <div>
-                        <h4 className="text-2xl font-black text-white uppercase tracking-tighter group-hover:text-passion transition-colors">
+                        <h4 className="text-2xl font-bold text-[var(--text)] tracking-tight group-hover:text-[var(--primary)] transition-colors">
                           {workout.workoutName}
                         </h4>
                         <div className="flex items-center gap-4 mt-2">
-                          <div className="flex items-center gap-1.5 text-slate-500">
+                          <div className="flex items-center gap-1.5 text-[var(--outline)]">
                             <Clock size={14} />
                             <span className="text-xs font-bold">{workout.duration} min</span>
                           </div>
-                          <div className="flex items-center gap-1.5 text-slate-500">
-                            <Activity size={14} className="text-energy" />
+                          <div className="flex items-center gap-1.5 text-[var(--outline)]">
+                            <Activity size={14} className="text-[var(--primary)]" />
                             <span className="text-xs font-bold">{workout.exercises.length} Exercises</span>
                           </div>
                         </div>
@@ -77,24 +77,24 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ history }) => {
 
                     <div className="space-y-6">
                       {workout.photo && (
-                        <div className="rounded-2xl overflow-hidden border border-white/10 aspect-video">
+                        <div className="rounded-2xl overflow-hidden border border-[var(--outline)]/10 aspect-video">
                           <img src={workout.photo} alt="Progress" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                         </div>
                       )}
 
-                      <div className="grid grid-cols-1 gap-4">
+                      <div className="grid grid-cols-1 gap-3">
                         {workout.exercises.map((ex, i) => (
-                          <div key={i} className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                          <div key={i} className="bg-[var(--surface-container)] rounded-2xl p-4 border border-[var(--outline)]/10">
                             <div className="flex justify-between items-center mb-3">
-                              <span className="text-xs font-black text-white uppercase tracking-tight">{ex.name}</span>
-                              <span className="text-[10px] font-bold text-slate-500 uppercase">{ex.muscleGroup}</span>
+                              <span className="text-xs font-bold text-[var(--text)] uppercase tracking-tight">{ex.name}</span>
+                              <span className="text-[10px] font-bold text-[var(--outline)] uppercase">{ex.muscleGroup}</span>
                             </div>
                             <div className="flex flex-wrap gap-2">
                               {ex.sets.map((s, si) => (
-                                <div key={si} className="bg-slate-800 px-2 py-1 rounded-lg flex items-center gap-1.5">
-                                  <span className="text-[10px] font-mono font-black text-energy">{s.weight}{s.isLbs ? 'lb' : 'kg'}</span>
-                                  <span className="text-[8px] font-bold text-slate-500">×</span>
-                                  <span className="text-[10px] font-mono font-black text-white">{s.reps}</span>
+                                <div key={si} className="bg-[var(--surface)] px-2 py-1 rounded-lg flex items-center gap-1.5 border border-[var(--outline)]/10">
+                                  <span className="text-[10px] font-bold text-[var(--primary)]">{s.weight}{s.isLbs ? 'lb' : 'kg'}</span>
+                                  <span className="text-[8px] font-bold text-[var(--outline)]">×</span>
+                                  <span className="text-[10px] font-bold text-[var(--text)]">{s.reps}</span>
                                 </div>
                               ))}
                             </div>
@@ -103,9 +103,9 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ history }) => {
                       </div>
 
                       {workout.notes && (
-                        <div className="bg-passion/5 p-4 rounded-2xl border border-passion/10 flex gap-3">
-                          <FileText size={16} className="text-passion flex-shrink-0" />
-                          <p className="text-xs text-slate-400 italic leading-relaxed">"{workout.notes}"</p>
+                        <div className="bg-[var(--primary)]/5 p-4 rounded-2xl border border-[var(--primary)]/10 flex gap-3">
+                          <FileText size={16} className="text-[var(--primary)] flex-shrink-0" />
+                          <p className="text-xs text-[var(--text)] italic leading-relaxed">"{workout.notes}"</p>
                         </div>
                       )}
                     </div>

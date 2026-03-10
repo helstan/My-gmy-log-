@@ -60,38 +60,38 @@ export const ProgressCharts: React.FC<ProgressChartsProps> = ({ history }) => {
 
   if (history.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center px-6">
-        <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center text-slate-600 mb-6">
+      <div className="flex flex-col items-center justify-center py-24 text-center px-6">
+        <div className="w-20 h-20 bg-[var(--surface-container)] rounded-full flex items-center justify-center text-[var(--outline)] mb-6">
           <BarChart3 size={40} />
         </div>
-        <h3 className="text-xl font-black text-white uppercase tracking-tighter mb-2">No Data Yet</h3>
-        <p className="text-slate-500 text-sm max-w-[280px]">Complete your first workout to start tracking your progress visually.</p>
+        <h3 className="text-xl font-bold text-[var(--text)] tracking-tight mb-2">No Data Yet</h3>
+        <p className="text-[var(--outline)] text-sm max-w-[280px]">Complete your first workout to start tracking your progress visually.</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-[520px] mx-auto p-4 space-y-6 pb-24">
+    <div className="max-w-[520px] mx-auto p-5 space-y-6 pb-24">
       <header className="flex flex-col gap-1">
-        <div className="flex items-center gap-2 text-passion">
-          <TrendingUp size={20} />
-          <span className="text-xs font-black uppercase tracking-[0.2em]">Visual Progress</span>
+        <div className="flex items-center gap-2 text-[var(--primary)]">
+          <TrendingUp size={18} />
+          <span className="text-xs font-bold uppercase tracking-wider">Analytics</span>
         </div>
-        <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Performance Analytics</h2>
+        <h2 className="text-3xl font-bold text-[var(--text)] tracking-tight">Performance</h2>
       </header>
 
       {/* Exercise Selector */}
-      <div className="bg-card rounded-3xl p-4 border border-white/10 shadow-xl">
-        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 px-2">Select Exercise</label>
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+      <div className="m3-card p-4 border border-[var(--outline)]/10">
+        <label className="block text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider mb-3 px-1">Select Exercise</label>
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
           {availableExercises.map(name => (
             <button
               key={name}
               onClick={() => setSelectedExercise(name)}
-              className={`flex-shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all active:scale-95 ${
                 selectedExercise === name 
-                  ? 'bg-passion text-white shadow-lg shadow-passion/30' 
-                  : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                  ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-md' 
+                  : 'bg-[var(--surface-container)] text-[var(--text)] hover:bg-[var(--outline)]/10 border border-[var(--outline)]/10'
               }`}
             >
               {name}
@@ -106,15 +106,15 @@ export const ProgressCharts: React.FC<ProgressChartsProps> = ({ history }) => {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-card rounded-3xl p-6 border border-white/10 shadow-xl"
+            className="m3-card p-6 border border-[var(--outline)]/10"
           >
             <div className="flex items-center justify-between mb-6">
               <div className="flex flex-col">
-                <span className="text-[10px] font-black text-passion uppercase tracking-widest">Heaviest Set</span>
-                <span className="text-2xl font-black text-white tracking-tighter">Strength Curve</span>
+                <span className="text-[10px] font-bold text-[var(--primary)] uppercase tracking-wider">Heaviest Set</span>
+                <span className="text-xl font-bold text-[var(--text)] tracking-tight">Strength Curve</span>
               </div>
-              <div className="bg-slate-800 p-2 rounded-xl text-energy">
-                <Activity size={20} />
+              <div className="bg-[var(--surface-container)] p-2 rounded-xl text-[var(--primary)]">
+                <Activity size={18} />
               </div>
             </div>
             
@@ -123,21 +123,21 @@ export const ProgressCharts: React.FC<ProgressChartsProps> = ({ history }) => {
                 <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#ff2e63" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#ff2e63" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.15}/>
+                      <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--outline)" strokeOpacity={0.1} vertical={false} />
                   <XAxis 
                     dataKey="date" 
-                    stroke="#64748b" 
+                    stroke="var(--outline)" 
                     fontSize={10} 
                     tickLine={false} 
                     axisLine={false}
                     dy={10}
                   />
                   <YAxis 
-                    stroke="#64748b" 
+                    stroke="var(--outline)" 
                     fontSize={10} 
                     tickLine={false} 
                     axisLine={false}
@@ -145,18 +145,20 @@ export const ProgressCharts: React.FC<ProgressChartsProps> = ({ history }) => {
                   />
                   <Tooltip 
                     contentStyle={{ 
-                      backgroundColor: '#151619', 
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '12px',
+                      backgroundColor: 'var(--surface)', 
+                      border: '1px solid var(--outline)',
+                      borderRadius: '16px',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                       fontSize: '12px',
-                      fontWeight: 'bold'
+                      fontWeight: '600',
+                      color: 'var(--text)'
                     }}
-                    itemStyle={{ color: '#ff2e63' }}
+                    itemStyle={{ color: 'var(--primary)' }}
                   />
                   <Area 
                     type="monotone" 
                     dataKey="weight" 
-                    stroke="#ff2e63" 
+                    stroke="var(--primary)" 
                     strokeWidth={3}
                     fillOpacity={1} 
                     fill="url(#colorWeight)" 
@@ -172,52 +174,54 @@ export const ProgressCharts: React.FC<ProgressChartsProps> = ({ history }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-card rounded-3xl p-6 border border-white/10 shadow-xl"
+            className="m3-card p-6 border border-[var(--outline)]/10"
           >
             <div className="flex items-center justify-between mb-6">
               <div className="flex flex-col">
-                <span className="text-[10px] font-black text-energy uppercase tracking-widest">Total Volume</span>
-                <span className="text-2xl font-black text-white tracking-tighter">Work Capacity</span>
+                <span className="text-[10px] font-bold text-[var(--success)] uppercase tracking-wider">Total Volume</span>
+                <span className="text-xl font-bold text-[var(--text)] tracking-tight">Work Capacity</span>
               </div>
-              <div className="bg-slate-800 p-2 rounded-xl text-passion">
-                <Target size={20} />
+              <div className="bg-[var(--surface-container)] p-2 rounded-xl text-[var(--success)]">
+                <Target size={18} />
               </div>
             </div>
             
             <div className="h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--outline)" strokeOpacity={0.1} vertical={false} />
                   <XAxis 
                     dataKey="date" 
-                    stroke="#64748b" 
+                    stroke="var(--outline)" 
                     fontSize={10} 
                     tickLine={false} 
                     axisLine={false}
                     dy={10}
                   />
                   <YAxis 
-                    stroke="#64748b" 
+                    stroke="var(--outline)" 
                     fontSize={10} 
                     tickLine={false} 
                     axisLine={false}
                   />
                   <Tooltip 
                     contentStyle={{ 
-                      backgroundColor: '#151619', 
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '12px',
+                      backgroundColor: 'var(--surface)', 
+                      border: '1px solid var(--outline)',
+                      borderRadius: '16px',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                       fontSize: '12px',
-                      fontWeight: 'bold'
+                      fontWeight: '600',
+                      color: 'var(--text)'
                     }}
-                    itemStyle={{ color: '#00f260' }}
+                    itemStyle={{ color: 'var(--success)' }}
                   />
                   <Line 
-                    type="stepAfter" 
+                    type="monotone" 
                     dataKey="volume" 
-                    stroke="#00f260" 
+                    stroke="var(--success)" 
                     strokeWidth={3}
-                    dot={{ r: 4, fill: '#00f260', strokeWidth: 2, stroke: '#151619' }}
+                    dot={{ r: 4, fill: 'var(--success)', strokeWidth: 2, stroke: 'var(--surface)' }}
                     activeDot={{ r: 6, strokeWidth: 0 }}
                     animationDuration={1500}
                   />
@@ -228,18 +232,18 @@ export const ProgressCharts: React.FC<ProgressChartsProps> = ({ history }) => {
 
           {/* Stats Grid */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-card rounded-3xl p-5 border border-white/10 shadow-lg">
-              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-1">Starting Weight</span>
-              <span className="text-xl font-black text-white">{chartData[0].weight}kg</span>
-              <div className="mt-2 flex items-center gap-1 text-[10px] font-bold text-slate-500">
+            <div className="m3-card p-5 border border-[var(--outline)]/10">
+              <span className="text-[9px] font-bold text-[var(--outline)] uppercase tracking-wider block mb-1">Starting Weight</span>
+              <span className="text-xl font-bold text-[var(--text)]">{chartData[0].weight}kg</span>
+              <div className="mt-2 flex items-center gap-1 text-[10px] font-bold text-[var(--outline)]">
                 <Calendar size={10} />
                 {chartData[0].date}
               </div>
             </div>
-            <div className="bg-card rounded-3xl p-5 border border-white/10 shadow-lg">
-              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-1">Current Best</span>
-              <span className="text-xl font-black text-energy">{Math.max(...chartData.map(d => d.weight))}kg</span>
-              <div className="mt-2 flex items-center gap-1 text-[10px] font-bold text-energy">
+            <div className="m3-card p-5 border border-[var(--outline)]/10">
+              <span className="text-[9px] font-bold text-[var(--outline)] uppercase tracking-wider block mb-1">Current Best</span>
+              <span className="text-xl font-bold text-[var(--primary)]">{Math.max(...chartData.map(d => d.weight))}kg</span>
+              <div className="mt-2 flex items-center gap-1 text-[10px] font-bold text-[var(--success)]">
                 <TrendingUp size={10} />
                 +{((Math.max(...chartData.map(d => d.weight)) - chartData[0].weight) / chartData[0].weight * 100).toFixed(0)}% gain
               </div>
@@ -247,8 +251,8 @@ export const ProgressCharts: React.FC<ProgressChartsProps> = ({ history }) => {
           </div>
         </div>
       ) : (
-        <div className="bg-card rounded-3xl p-12 border border-white/10 shadow-xl text-center">
-          <p className="text-slate-500 font-bold">Select an exercise to see your progress charts.</p>
+        <div className="m3-card p-12 text-center border border-[var(--outline)]/10">
+          <p className="text-[var(--outline)] font-bold">Select an exercise to see your progress charts.</p>
         </div>
       )}
     </div>

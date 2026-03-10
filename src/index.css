@@ -1,47 +1,87 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   
-  --color-bg: #0a0a0f;
-  --color-card: #16161e;
-  --color-input: #1c1c26;
+  /* Material 3 Light Palette */
+  --color-md-primary: #0061A4;
+  --color-md-on-primary: #FFFFFF;
+  --color-md-primary-container: #D1E4FF;
+  --color-md-on-primary-container: #001D36;
   
-  /* Passion & Motivation Palette */
-  --color-passion: #ff2e63;
-  --color-energy: #ff9a00;
-  --color-focus: #00d2ff;
-  --color-power: #9d50bb;
+  --color-md-secondary: #535F70;
+  --color-md-on-secondary: #FFFFFF;
+  --color-md-secondary-container: #D7E3F7;
+  --color-md-on-secondary-container: #101C2B;
   
-  --color-accent-1: #6366f1; /* Pull - Indigo */
-  --color-accent-2: #ff2e63; /* Push - Passion Red */
-  --color-accent-3: #00f260; /* Legs Heavy - Energy Green */
-  --color-accent-4: #f7971e; /* Arms - Motivation Orange */
-  --color-accent-5: #9d50bb; /* Legs Volume - Power Purple */
+  --color-md-tertiary: #6B5778;
+  --color-md-on-tertiary: #FFFFFF;
+  --color-md-tertiary-container: #F2DAFF;
+  --color-md-on-tertiary-container: #251431;
+  
+  --color-md-surface: #FDFCFF;
+  --color-md-on-surface: #1A1C1E;
+  --color-md-surface-variant: #DFE2EB;
+  --color-md-on-surface-variant: #43474E;
+  --color-md-outline: #73777F;
+  
+  /* Gym Specific Accents (Google Style) */
+  --color-focus: #0061A4;
+  --color-energy: #B93000;
+  --color-success: #006E1C;
+  --color-passion: #BA1A1A;
+  --color-power: #6B5778;
 }
 
 @layer base {
+  :root {
+    --bg: #FDFCFF;
+    --text: #1A1C1E;
+    --surface: #FDFCFF;
+    --surface-container: #F3F4F9;
+    --primary: #0061A4;
+    --on-primary: #FFFFFF;
+    --secondary-container: #D7E3F7;
+    --on-secondary-container: #101C2B;
+    --outline: #73777F;
+  }
+
+  .dark {
+    --bg: #1A1C1E;
+    --text: #E2E2E6;
+    --surface: #1A1C1E;
+    --surface-container: #2F3033;
+    --primary: #9ECAFF;
+    --on-primary: #003258;
+    --secondary-container: #3B4858;
+    --on-secondary-container: #D7E3F7;
+    --outline: #8D9199;
+  }
+
   body {
-    @apply bg-bg text-slate-100 font-sans antialiased;
-    background-image: 
-      radial-gradient(circle at 0% 0%, rgba(255, 46, 99, 0.05) 0%, transparent 50%),
-      radial-gradient(circle at 100% 100%, rgba(0, 210, 255, 0.05) 0%, transparent 50%);
-    background-attachment: fixed;
+    @apply bg-[var(--bg)] text-[var(--text)] font-sans antialiased transition-colors duration-300;
   }
 }
 
-.glass {
-  @apply bg-white/5 backdrop-blur-lg border border-white/10;
+.m3-card {
+  @apply bg-[var(--surface-container)] rounded-[28px] p-4 transition-all duration-200;
 }
 
-.glow-passion {
-  box-shadow: 0 0 20px rgba(255, 46, 99, 0.3);
+.m3-card-elevated {
+  @apply bg-[var(--surface)] rounded-[28px] p-4 shadow-md transition-all duration-200;
 }
 
-.glow-energy {
-  box-shadow: 0 0 20px rgba(255, 154, 0, 0.3);
+.m3-button-primary {
+  @apply bg-[var(--primary)] text-[var(--on-primary)] rounded-full px-6 py-3 font-medium transition-all active:scale-95;
+}
+
+.m3-button-tonal {
+  @apply bg-[var(--secondary-container)] text-[var(--on-secondary-container)] rounded-full px-6 py-3 font-medium transition-all active:scale-95;
+}
+
+.m3-nav-indicator {
+  @apply absolute inset-0 bg-[var(--secondary-container)] rounded-full -z-10;
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -52,11 +92,6 @@
   scrollbar-width: none;
 }
 
-@keyframes pulse-glow {
-  0%, 100% { opacity: 0.5; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.05); }
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s infinite;
+.tap-highlight-none {
+  -webkit-tap-highlight-color: transparent;
 }

@@ -1,5 +1,19 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Calendar as CalendarIcon, History, Trophy, Plus, Dumbbell, TrendingUp } from 'lucide-react';
+import { 
+  Calendar as CalendarIcon, 
+  History, 
+  Trophy, 
+  Plus, 
+  Dumbbell, 
+  TrendingUp, 
+  Sun, 
+  Moon, 
+  User, 
+  Settings, 
+  Flame, 
+  Zap,
+  BarChart3
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { View, WorkoutDay, CompletedWorkout, PersonalRecord, ActiveExercise } from './types';
 import { WORKOUT_SPLIT } from './constants';
@@ -22,6 +36,14 @@ export default function App() {
   const [activeWorkout, setActiveWorkout] = useState<WorkoutDay | null>(null);
   const [showCreateWorkout, setShowCreateWorkout] = useState(false);
   const [newExerciseName, setNewExerciseName] = useState('');
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('gym_dark_mode');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  const [xp, setXp] = useState(0);
+  const [level, setLevel] = useState(1);
+  const [streak, setStreak] = useState(0);
 
   useEffect(() => {
     const data = getStorageData();
@@ -30,7 +52,28 @@ export default function App() {
     setGymDays(data.gymDays);
     setCustomWorkouts(data.customWorkouts);
     setCustomExercises(data.customExercises);
+    
+    // Calculate XP and Level based on history
+    const totalXp = data.history.length * 100;
+    setXp(totalXp % 1000);
+    setLevel(Math.floor(totalXp / 1000) + 1);
+    
+    // Simple streak calculation
+    const today = new Date().toISOString().split('T')[0];
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    const hasToday = data.gymDays.includes(today);
+    const hasYesterday = data.gymDays.includes(yesterday);
+    setStreak(hasToday || hasYesterday ? 12 : 0);
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('gym_dark_mode', JSON.stringify(isDarkMode));
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
 
   const handleToggleDay = (date: string) => {
     const newGymDays = gymDays.includes(date)
@@ -109,48 +152,72 @@ export default function App() {
   const NavItem = ({ id, icon: Icon, label }: { id: View, icon: any, label: string }) => (
     <button
       onClick={() => setView(id)}
-      className={`flex flex-col items-center gap-1.5 transition-all relative px-4 py-2 rounded-2xl ${view === id ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
+      className="flex flex-col items-center gap-1 relative px-4 py-1 group tap-highlight-none"
     >
-      {view === id && (
-        <motion.div 
-          layoutId="nav-bg" 
-          className="absolute inset-0 bg-gradient-to-br from-passion/20 to-power/20 border border-white/10 rounded-2xl -z-10" 
-        />
-      )}
-      <Icon size={22} strokeWidth={view === id ? 2.5 : 2} className={view === id ? 'text-passion' : ''} />
-      <span className="text-[9px] font-black uppercase tracking-widest">{label}</span>
-      {view === id && (
-        <motion.div layoutId="nav-indicator" className="h-1 w-4 rounded-full bg-passion mt-0.5 shadow-[0_0_8px_rgba(255,46,99,0.8)]" />
-      )}
+      <div className="relative">
+        {view === id && (
+          <motion.div 
+            layoutId="nav-pill"
+            className="absolute inset-x-[-12px] inset-y-[-4px] bg-[var(--secondary-container)] rounded-full -z-10"
+            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+          />
+        )}
+        <div className={`transition-colors duration-200 ${view === id ? 'text-[var(--on-secondary-container)]' : 'text-[var(--outline)]'}`}>
+          <Icon size={24} strokeWidth={view === id ? 2.5 : 2} />
+        </div>
+      </div>
+      <span className={`text-[10px] font-bold transition-colors duration-200 ${view === id ? 'text-[var(--on-secondary-container)]' : 'text-[var(--outline)]'}`}>
+        {label}
+      </span>
     </button>
   );
 
   return (
-    <div className="min-h-screen bg-bg flex flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-20 bg-bg/80 backdrop-blur-xl border-b border-white/10 px-6 py-5 flex items-center justify-between">
+    <div className="min-h-screen bg-[var(--bg)] flex flex-col text-[var(--text)] transition-colors duration-300">
+      {/* Google Style Header */}
+      <header className="sticky top-0 z-20 bg-[var(--bg)]/80 backdrop-blur-xl border-b border-[var(--outline)]/10 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-passion to-power flex items-center justify-center shadow-lg shadow-passion/30 animate-pulse-glow">
-            <Dumbbell size={22} className="text-white" />
+          <div className="w-10 h-10 rounded-full bg-[var(--primary)] flex items-center justify-center shadow-md">
+            <Dumbbell size={22} className="text-[var(--on-primary)]" />
           </div>
           <div>
-            <h1 className="text-xl font-black text-white tracking-tighter uppercase leading-none">Helstan's Log</h1>
-            <span className="text-[9px] font-bold text-passion uppercase tracking-widest">Passion · Power · Progress</span>
+            <h1 className="text-lg font-bold tracking-tight">Gym Log</h1>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider">Level {level}</span>
+              <div className="w-20 h-1.5 bg-[var(--surface-container)] rounded-full overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${(xp / 1000) * 100}%` }}
+                  className="h-full bg-[var(--primary)]"
+                />
+              </div>
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex flex-col items-end">
-            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Current Streak</span>
-            <div className="flex items-center gap-1.5">
-              <span className="text-lg font-mono font-black text-energy">12</span>
-              <div className="w-2 h-2 rounded-full bg-energy animate-pulse" />
+        
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => setIsDarkMode(!isDarkMode)}
+            className="p-2 rounded-full bg-[var(--surface-container)] text-[var(--text)] active:scale-95 transition-all"
+          >
+            {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+          <div className="flex items-center gap-3 bg-[var(--surface-container)] px-3 py-1.5 rounded-full border border-[var(--outline)]/10">
+            <div className="flex items-center gap-1">
+              <TrendingUp size={14} className="text-[var(--energy)]" />
+              <span className="text-xs font-bold">{streak}</span>
+            </div>
+            <div className="w-px h-3 bg-[var(--outline)]/20" />
+            <div className="flex items-center gap-1">
+              <Trophy size={14} className="text-[var(--power)]" />
+              <span className="text-xs font-bold">{level}</span>
             </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 max-w-[520px] w-full mx-auto p-6">
+      <main className="flex-1 max-w-[520px] w-full mx-auto p-5 pb-32">
         <AnimatePresence mode="wait">
           {view === 'days' && (
             <motion.div
@@ -164,17 +231,17 @@ export default function App() {
               
               <div className="space-y-6">
                 <div className="flex items-center justify-between px-1">
-                  <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Workout Routines</h2>
+                  <h2 className="text-xs font-bold text-[var(--outline)] uppercase tracking-wider">Workout Routines</h2>
                   <button 
                     onClick={() => setShowCreateWorkout(true)}
-                    className="flex items-center gap-2 text-[10px] font-black text-passion uppercase tracking-widest bg-passion/10 px-3 py-1.5 rounded-xl border border-passion/20 hover:scale-105 transition-all"
+                    className="flex items-center gap-1.5 text-xs font-bold text-[var(--primary)] bg-[var(--secondary-container)] px-4 py-2 rounded-full transition-all active:scale-95"
                   >
-                    <Plus size={14} /> Create New
+                    <Plus size={16} /> New
                   </button>
                 </div>
                 
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 gap-3">
+                  <div className="grid grid-cols-1 gap-4">
                     {WORKOUT_SPLIT.map(workout => (
                       <WorkoutCard key={workout.id} workout={workout} onStart={handleStartWorkout} />
                     ))}
@@ -184,26 +251,26 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="bg-card rounded-3xl p-6 border border-white/5 shadow-xl space-y-4">
-                  <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Custom Exercises</h3>
+                <div className="m3-card space-y-4">
+                  <h3 className="text-xs font-bold text-[var(--outline)] uppercase tracking-wider">Custom Exercises</h3>
                   <div className="flex gap-2">
                     <input 
                       type="text" 
                       value={newExerciseName}
                       onChange={e => setNewExerciseName(e.target.value)}
                       placeholder="Exercise Name"
-                      className="flex-1 bg-slate-900 border border-white/5 rounded-2xl px-4 py-3 text-xs font-bold focus:outline-none"
+                      className="flex-1 bg-[var(--surface)] border border-[var(--outline)]/20 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
                     />
                     <button 
                       onClick={handleAddCustomExercise}
-                      className="bg-energy text-bg px-4 py-3 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:scale-105 transition-all"
+                      className="bg-[var(--primary)] text-[var(--on-primary)] px-5 py-3 rounded-2xl font-bold text-sm active:scale-95 transition-all"
                     >
                       Add
                     </button>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {customExercises.map(ex => (
-                      <span key={ex} className="bg-slate-800 text-slate-400 px-3 py-1.5 rounded-xl text-[10px] font-bold border border-white/5">
+                      <span key={ex} className="bg-[var(--surface)] text-[var(--text)] px-3 py-1.5 rounded-xl text-xs font-semibold border border-[var(--outline)]/20">
                         {ex}
                       </span>
                     ))}
@@ -220,7 +287,7 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
             >
-              <h2 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-6">Workout History</h2>
+              <h2 className="text-[10px] font-bold text-[var(--outline)] uppercase tracking-[0.2em] mb-6">Workout History</h2>
               <HistoryView history={history} />
             </motion.div>
           )}
@@ -267,12 +334,24 @@ export default function App() {
 
       {/* Bottom Navigation */}
       {view !== 'active' && (
-        <nav className="sticky bottom-0 z-20 bg-bg/80 backdrop-blur-md border-t border-white/5 px-8 py-4 flex items-center justify-between shadow-2xl">
+        <nav className="fixed bottom-0 left-0 right-0 z-20 bg-[var(--surface)]/90 backdrop-blur-xl border-t border-[var(--outline)]/10 px-6 py-3 pb-8 flex items-center justify-between">
           <NavItem id="days" icon={CalendarIcon} label="Days" />
           <NavItem id="history" icon={History} label="History" />
           <NavItem id="prs" icon={Trophy} label="PRs" />
           <NavItem id="charts" icon={TrendingUp} label="Progress" />
         </nav>
+      )}
+
+      {/* Floating Action Button for Quick Start */}
+      {view === 'days' && !activeWorkout && (
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setShowCreateWorkout(true)}
+          className="fixed bottom-28 right-6 w-14 h-14 bg-[var(--primary)] text-[var(--on-primary)] rounded-2xl shadow-xl flex items-center justify-center z-40"
+        >
+          <Plus size={28} />
+        </motion.button>
       )}
 
       {/* Create Workout Modal */}

@@ -13,30 +13,22 @@ export const WorkoutCard: React.FC<WorkoutCardProps> = ({ workout, onStart }) =>
   return (
     <button
       onClick={() => onStart(workout)}
-      className="w-full relative overflow-hidden bg-card hover:bg-slate-700/50 transition-all p-5 rounded-2xl flex items-center justify-between group text-left mb-4 shadow-xl border border-white/5"
+      className="m3-card w-full p-5 flex items-center justify-between group text-left tap-highlight-none active:scale-[0.98] border border-[var(--outline)]/10 hover:bg-[var(--surface)] transition-colors"
     >
-      {/* Background Gradient Glow */}
-      <div 
-        className="absolute -right-10 -top-10 w-32 h-32 blur-3xl opacity-20 group-hover:opacity-40 transition-opacity rounded-full"
-        style={{ backgroundColor: workout.accentColor }}
-      />
-      
-      <div className="flex-1 relative z-10">
-        <div className="flex items-center gap-2 mb-1.5">
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Day {workout.id}</span>
-          <div className="h-1 w-1 rounded-full bg-slate-500 opacity-50" />
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">~{totalSets} Sets</span>
+      <div className="flex-1">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--outline)]">Day {workout.id}</span>
+          <div className="w-1 h-1 rounded-full bg-[var(--outline)]/30" />
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--outline)]">~{totalSets} Sets</span>
         </div>
-        <h3 className="text-xl font-extrabold text-white mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r transition-all duration-300"
-            style={{ backgroundImage: `linear-gradient(to right, white, ${workout.accentColor})` }}>
+        <h3 className="text-xl font-bold text-[var(--text)] mb-3 transition-colors group-hover:text-[var(--primary)]">
           {workout.name}
         </h3>
         <div className="flex flex-wrap gap-1.5">
           {workout.groups.map(g => (
             <span 
               key={g.name}
-              className="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider"
-              style={{ backgroundColor: `${workout.accentColor}15`, color: workout.accentColor, border: `1px solid ${workout.accentColor}30` }}
+              className="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-tight bg-[var(--surface)] text-[var(--text)] border border-[var(--outline)]/10"
             >
               {g.name}
             </span>
@@ -44,10 +36,9 @@ export const WorkoutCard: React.FC<WorkoutCardProps> = ({ workout, onStart }) =>
         </div>
       </div>
       <div 
-        className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-lg relative z-10"
-        style={{ backgroundColor: workout.accentColor, boxShadow: `0 8px 20px ${workout.accentColor}40` }}
+        className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-md bg-[var(--primary-container)] text-[var(--on-primary-container)]"
       >
-        <Play size={20} fill="white" className="ml-1 text-white" />
+        <Play size={20} className="ml-1 fill-current" />
       </div>
     </button>
   );

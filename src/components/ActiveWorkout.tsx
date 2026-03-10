@@ -246,55 +246,53 @@ export const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({ workout, onClose, 
   ])).sort();
 
   return (
-    <div className="fixed inset-0 z-50 bg-bg overflow-y-auto pb-24">
-      <div className="sticky top-0 z-10 bg-bg/80 backdrop-blur-xl border-b border-white/10 p-4 flex items-center justify-between">
-        <button onClick={onClose} className="p-2 hover:bg-slate-800 rounded-full transition-colors text-slate-400">
+    <div className="fixed inset-0 z-50 bg-[var(--bg)] overflow-y-auto pb-24 text-[var(--text)] transition-colors duration-300">
+      <div className="sticky top-0 z-10 bg-[var(--bg)]/80 backdrop-blur-xl border-b border-[var(--outline)]/10 p-4 flex items-center justify-between">
+        <button onClick={onClose} className="p-2 hover:bg-[var(--surface-container)] rounded-full transition-colors text-[var(--outline)]">
           <X size={24} />
         </button>
         <div className="flex flex-col items-center">
-          <span className="text-[9px] font-black uppercase tracking-[0.3em] text-passion">Session In Progress</span>
-          <div className="flex items-center gap-3">
-            <span className="text-2xl font-mono font-black text-white tracking-tighter">{formatTime(elapsed)}</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--primary)]">Session Active</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xl font-bold tracking-tight">{formatTime(elapsed)}</span>
             <button 
               onClick={() => setIsPaused(!isPaused)} 
-              className={`p-2 rounded-xl transition-all ${isPaused ? 'bg-energy text-white' : 'bg-slate-800 text-slate-400'}`}
+              className={`p-1.5 rounded-lg transition-all ${isPaused ? 'bg-[var(--energy)] text-white' : 'bg-[var(--surface-container)] text-[var(--outline)]'}`}
             >
-              {isPaused ? <Play size={18} fill="currentColor" /> : <Pause size={18} fill="currentColor" />}
+              {isPaused ? <Play size={16} fill="currentColor" /> : <Pause size={16} fill="currentColor" />}
             </button>
           </div>
         </div>
         <button 
           onClick={() => onFinish(exercises, Math.floor(elapsed / 60), notes, photo)}
-          className="bg-gradient-to-r from-passion to-power hover:scale-105 text-white px-6 py-2 rounded-xl text-sm font-black uppercase tracking-widest transition-all shadow-lg shadow-passion/30"
+          className="bg-[var(--primary)] text-[var(--on-primary)] px-5 py-2 rounded-full text-sm font-bold transition-all active:scale-95 shadow-md"
         >
           Finish
         </button>
       </div>
 
-      <div className="max-w-[520px] mx-auto p-4 space-y-6">
+      <div className="max-w-[520px] mx-auto p-5 space-y-6">
         {/* Rest Timer */}
-        <div className="bg-card rounded-3xl p-6 border border-white/10 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-energy/10 blur-3xl rounded-full -mr-16 -mt-16" />
-          
+        <div className="m3-card relative overflow-hidden border border-[var(--outline)]/10">
           <div className="flex items-center justify-between mb-4 relative z-10">
-            <div className="flex items-center gap-2 text-energy">
-              <Timer size={20} />
-              <span className="text-xs font-black uppercase tracking-[0.2em]">Rest & Recover</span>
+            <div className="flex items-center gap-2 text-[var(--outline)]">
+              <Timer size={18} />
+              <span className="text-xs font-bold uppercase tracking-wider">Rest Timer</span>
             </div>
             {restTimer !== null && (
-              <div className="flex items-center gap-4">
-                <span className={`text-3xl font-mono font-black tracking-tighter ${restTimer <= 10 ? 'text-passion animate-pulse' : 'text-white'}`}>
+              <div className="flex items-center gap-3">
+                <span className={`text-2xl font-bold tracking-tight ${restTimer <= 10 ? 'text-[var(--passion)] animate-pulse' : 'text-[var(--text)]'}`}>
                   {formatTime(restTimer)}
                 </span>
-                <button onClick={() => setRestTimer(null)} className="bg-slate-800 hover:bg-slate-700 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg text-slate-400 transition-colors">Skip</button>
+                <button onClick={() => setRestTimer(null)} className="text-xs font-bold text-[var(--primary)] px-2 py-1">Skip</button>
               </div>
             )}
           </div>
           
           {restTimer !== null && (
-            <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden mb-6 relative z-10">
+            <div className="h-1.5 w-full bg-[var(--surface)] rounded-full overflow-hidden mb-6 relative z-10">
               <motion.div 
-                className={`h-full ${restTimer <= 10 ? 'bg-passion' : 'bg-gradient-to-r from-energy to-passion'}`}
+                className={`h-full ${restTimer <= 10 ? 'bg-[var(--passion)]' : 'bg-[var(--primary)]'}`}
                 initial={{ width: '100%' }}
                 animate={{ width: `${(restTimer / initialRest) * 100}%` }}
                 transition={{ duration: 1, ease: 'linear' }}
@@ -307,7 +305,7 @@ export const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({ workout, onClose, 
               <button 
                 key={s}
                 onClick={() => startRest(s)}
-                className="flex-shrink-0 bg-slate-800 hover:bg-energy hover:text-white text-slate-400 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+                className="flex-shrink-0 bg-[var(--surface)] hover:bg-[var(--primary)] hover:text-[var(--on-primary)] text-[var(--text)] px-4 py-2 rounded-full text-xs font-bold transition-all active:scale-95 border border-[var(--outline)]/10"
               >
                 {s < 60 ? `${s}s` : `${s/60}m`}
               </button>
@@ -316,26 +314,26 @@ export const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({ workout, onClose, 
         </div>
 
         {/* Progress Photo Upload */}
-        <div className="bg-card rounded-3xl p-6 border border-white/10 shadow-2xl relative overflow-hidden">
-          <div className="flex items-center gap-2 text-passion mb-4">
-            <Camera size={20} />
-            <span className="text-xs font-black uppercase tracking-[0.2em]">Progress Photo</span>
+        <div className="m3-card relative overflow-hidden border border-[var(--outline)]/10">
+          <div className="flex items-center gap-2 text-[var(--passion)] mb-4">
+            <Camera size={18} />
+            <span className="text-xs font-bold uppercase tracking-wider">Progress Photo</span>
           </div>
 
           <AnimatePresence mode="wait">
             {photo ? (
               <motion.div 
                 key="preview"
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
+                exit={{ opacity: 0, scale: 0.95 }}
                 className="relative rounded-2xl overflow-hidden aspect-video group"
               >
                 <img src={photo} alt="Progress" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                   <button 
                     onClick={() => setPhoto(undefined)}
-                    className="bg-passion text-white p-3 rounded-full shadow-xl hover:scale-110 transition-transform"
+                    className="bg-white text-[var(--passion)] p-3 rounded-full shadow-lg hover:scale-110 transition-transform"
                   >
                     <Trash2 size={20} />
                   </button>
@@ -349,16 +347,15 @@ export const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({ workout, onClose, 
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
                 className={`
-                  border-2 border-dashed rounded-2xl aspect-video flex flex-col items-center justify-center gap-3 cursor-pointer transition-all
-                  ${isDragging ? 'border-passion bg-passion/10' : 'border-slate-800 hover:border-passion/50 hover:bg-white/5'}
+                  border-2 border-dashed rounded-2xl aspect-video flex flex-col items-center justify-center gap-2 cursor-pointer transition-all
+                  ${isDragging ? 'border-[var(--primary)] bg-[var(--primary)]/5' : 'border-[var(--outline)]/20 hover:border-[var(--primary)]/50 hover:bg-[var(--surface-container)]'}
                 `}
               >
-                <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-slate-500">
-                  <Upload size={24} />
+                <div className="w-10 h-10 rounded-full bg-[var(--surface-container)] flex items-center justify-center text-[var(--outline)]">
+                  <Upload size={20} />
                 </div>
                 <div className="text-center">
-                  <p className="text-xs font-black uppercase tracking-widest text-slate-300">Drop your photo here</p>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase mt-1">or click to browse</p>
+                  <p className="text-xs font-bold text-[var(--text)]">Tap to add photo</p>
                 </div>
                 <input 
                   type="file" 
@@ -377,140 +374,136 @@ export const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({ workout, onClose, 
           {exercises.map((ex, exIdx) => {
             const isTargetExceeded = (ex.actualTime || 0) > (ex.targetTime || 0);
             return (
-              <div key={ex.id} className={`bg-card rounded-2xl overflow-hidden border transition-all ${ex.isCompleted ? 'opacity-60 border-emerald-500/30' : 'border-white/5 shadow-lg'}`}>
-                <div className="p-4 border-b border-white/5 flex items-center justify-between">
+              <div key={ex.id} className={`m3-card overflow-hidden transition-all border border-[var(--outline)]/10 ${ex.isCompleted ? 'opacity-60 bg-[var(--surface-container)]' : 'bg-[var(--surface)]'}`}>
+                <div className="p-4 border-b border-[var(--outline)]/10 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="flex flex-col gap-1">
-                      <button onClick={() => moveExercise(exIdx, 'up')} className="p-0.5 hover:text-indigo-400 transition-colors"><ChevronUp size={14} /></button>
-                      <button onClick={() => moveExercise(exIdx, 'down')} className="p-0.5 hover:text-indigo-400 transition-colors"><ChevronDown size={14} /></button>
+                    <div className="flex flex-col gap-0.5">
+                      <button onClick={() => moveExercise(exIdx, 'up')} className="p-1 hover:text-[var(--primary)] transition-colors"><ChevronUp size={16} /></button>
+                      <button onClick={() => moveExercise(exIdx, 'down')} className="p-1 hover:text-[var(--primary)] transition-colors"><ChevronDown size={16} /></button>
                     </div>
                     <button 
                       onClick={() => toggleComplete(ex.id)}
-                      className={`p-1 rounded-lg transition-colors ${ex.isCompleted ? 'text-emerald-500' : 'text-slate-600 hover:text-white'}`}
+                      className={`p-1 rounded-lg transition-colors ${ex.isCompleted ? 'text-[var(--success)]' : 'text-[var(--outline)]/30 hover:text-[var(--outline)]'}`}
                     >
-                      {ex.isCompleted ? <CheckSquare size={24} /> : <Square size={24} />}
+                      {ex.isCompleted ? <CheckSquare size={28} /> : <Square size={28} />}
                     </button>
                     <div>
-                      <h4 className={`text-sm font-bold leading-tight ${ex.isCompleted ? 'text-slate-400 line-through' : 'text-white'}`}>{ex.name}</h4>
-                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{ex.muscleGroup}</span>
+                      <h4 className={`text-base font-bold tracking-tight ${ex.isCompleted ? 'text-[var(--outline)] line-through' : 'text-[var(--text)]'}`}>{ex.name}</h4>
+                      <span className="text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider">{ex.muscleGroup}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     {!ex.isCompleted && (
                       <button 
                         onClick={() => activeExerciseId === ex.id ? setActiveExerciseId(null) : startExerciseTimer(ex.id)}
-                        className={`p-2 rounded-xl transition-all ${activeExerciseId === ex.id ? 'bg-passion text-white animate-pulse' : 'bg-slate-800 text-slate-400'}`}
+                        className={`p-2 rounded-xl transition-all ${activeExerciseId === ex.id ? 'bg-[var(--passion)] text-white' : 'bg-[var(--surface-container)] text-[var(--outline)]'}`}
                       >
-                        <Clock size={16} />
+                        <Clock size={18} />
                       </button>
                     )}
                     <button 
                       onClick={() => toggleUnit(ex.id)}
-                      className="text-[10px] font-bold bg-slate-800 px-2 py-1 rounded-md text-slate-400 hover:text-white transition-colors"
+                      className="text-[10px] font-bold bg-[var(--surface-container)] px-2.5 py-1.5 rounded-lg text-[var(--text)] border border-[var(--outline)]/10"
                     >
                       {ex.isLbs ? 'LBS' : 'KG'}
                     </button>
-                    <button onClick={() => removeExercise(ex.id)} className="p-2 hover:bg-red-500/20 rounded-full transition-colors text-slate-500 hover:text-red-500">
-                      <Trash2 size={16} />
+                    <button onClick={() => removeExercise(ex.id)} className="p-2 hover:bg-[var(--passion)]/10 rounded-full transition-colors text-[var(--outline)]/30 hover:text-[var(--passion)]">
+                      <Trash2 size={18} />
                     </button>
                   </div>
                 </div>
 
                 <div className="p-4">
                   {/* Time Tracking Display */}
-                  <div className="flex items-center justify-between mb-4 bg-slate-900/50 p-3 rounded-xl border border-white/5">
+                  <div className="flex items-center justify-between mb-5 bg-[var(--surface-container)] p-3 rounded-2xl border border-[var(--outline)]/10">
                     <div className="flex flex-col">
-                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Target</span>
-                      <span className="text-sm font-mono font-bold text-slate-300">{formatTime(ex.targetTime || 0)}</span>
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--outline)]">Target</span>
+                      <span className="text-sm font-bold text-[var(--text)]">{formatTime(ex.targetTime || 0)}</span>
                     </div>
                     <div className="flex flex-col items-center">
-                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Actual</span>
-                      <span className={`text-sm font-mono font-bold ${isTargetExceeded ? 'text-passion' : 'text-energy'}`}>
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--outline)]">Actual</span>
+                      <span className={`text-sm font-bold ${isTargetExceeded ? 'text-[var(--passion)]' : 'text-[var(--primary)]'}`}>
                         {formatTime(ex.actualTime || 0)}
                       </span>
                     </div>
                     <div className="flex flex-col items-end">
-                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Status</span>
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--outline)]">Status</span>
                       {isTargetExceeded ? (
-                        <span className="flex items-center gap-1 text-[10px] font-bold text-passion uppercase">
+                        <span className="flex items-center gap-1 text-[10px] font-bold text-[var(--passion)] uppercase">
                           <AlertCircle size={10} /> Over
                         </span>
                       ) : (
-                        <span className="text-[10px] font-bold text-energy uppercase">On Track</span>
+                        <span className="text-[10px] font-bold text-[var(--success)] uppercase">On Track</span>
                       )}
                     </div>
                   </div>
 
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="text-slate-500 font-bold uppercase tracking-wider">
-                        <th className="pb-3 w-10">Set</th>
-                        <th className="pb-3">Weight</th>
-                        <th className="pb-3">Reps</th>
-                        <th className="pb-3">RPE</th>
-                        <th className="pb-3 text-right">Vol</th>
-                      </tr>
-                    </thead>
-                    <tbody className="space-y-2">
-                      {ex.sets.map((set, setIdx) => {
-                        const volume = set.weight * set.reps;
-                        const hasPR = isPR(ex, set);
-                        return (
-                          <tr key={set.id} className="group">
-                            <td className="py-2 text-slate-400 font-mono">{setIdx + 1}</td>
-                            <td className="py-2">
-                              <div className="flex flex-col">
-                                <input 
-                                  type="number" 
-                                  value={set.weight || ''} 
-                                  onChange={e => updateSet(ex.id, set.id, 'weight', parseFloat(e.target.value) || 0)}
-                                  className="w-16 bg-input border border-white/5 rounded-lg px-2 py-1.5 text-white font-mono focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                  disabled={ex.isCompleted}
-                                />
-                                {ex.isLbs && set.weight > 0 && (
-                                  <span className="text-[9px] text-slate-500 mt-0.5">≈ {(set.weight * 0.453592).toFixed(1)}kg</span>
-                                )}
-                              </div>
-                            </td>
-                            <td className="py-2">
-                              <input 
-                                type="number" 
-                                value={set.reps || ''} 
-                                onChange={e => updateSet(ex.id, set.id, 'reps', parseInt(e.target.value) || 0)}
-                                className="w-12 bg-input border border-white/5 rounded-lg px-2 py-1.5 text-white font-mono focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                disabled={ex.isCompleted}
-                              />
-                            </td>
-                            <td className="py-2">
-                              <input 
-                                type="number" 
-                                value={set.rpe || ''} 
-                                onChange={e => updateSet(ex.id, set.id, 'rpe', parseFloat(e.target.value) || 0)}
-                                className="w-12 bg-input border border-white/5 rounded-lg px-2 py-1.5 text-white font-mono focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                disabled={ex.isCompleted}
-                              />
-                            </td>
-                            <td className="py-2 text-right">
-                              <div className="flex flex-col items-end">
-                                <span className="font-mono text-slate-300">{volume}</span>
-                                {hasPR && (
-                                  <span className="flex items-center gap-0.5 text-[9px] font-bold text-yellow-500 uppercase mt-0.5">
-                                    <Trophy size={8} /> PR
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-5 gap-2 text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider px-2">
+                      <div className="col-span-1">Set</div>
+                      <div className="col-span-1">Weight</div>
+                      <div className="col-span-1">Reps</div>
+                      <div className="col-span-1">RPE</div>
+                      <div className="col-span-1 text-right">Vol</div>
+                    </div>
+                    
+                    {ex.sets.map((set, setIdx) => {
+                      const volume = set.weight * set.reps;
+                      const hasPR = isPR(ex, set);
+                      return (
+                        <div key={set.id} className="grid grid-cols-5 gap-2 items-center px-1">
+                          <div className="text-sm font-bold text-[var(--outline)]">{setIdx + 1}</div>
+                          <div>
+                            <input 
+                              type="number" 
+                              inputMode="decimal"
+                              value={set.weight || ''} 
+                              onChange={e => updateSet(ex.id, set.id, 'weight', parseFloat(e.target.value) || 0)}
+                              className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-2 py-2.5 text-sm font-bold text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
+                              disabled={ex.isCompleted}
+                            />
+                          </div>
+                          <div>
+                            <input 
+                              type="number" 
+                              inputMode="numeric"
+                              value={set.reps || ''} 
+                              onChange={e => updateSet(ex.id, set.id, 'reps', parseInt(e.target.value) || 0)}
+                              className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-2 py-2.5 text-sm font-bold text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
+                              disabled={ex.isCompleted}
+                            />
+                          </div>
+                          <div>
+                            <input 
+                              type="number" 
+                              inputMode="decimal"
+                              value={set.rpe || ''} 
+                              onChange={e => updateSet(ex.id, set.id, 'rpe', parseFloat(e.target.value) || 0)}
+                              className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-2 py-2.5 text-sm font-bold text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
+                              disabled={ex.isCompleted}
+                            />
+                          </div>
+                          <div className="text-right">
+                            <div className="flex flex-col items-end">
+                              <span className="text-sm font-bold text-[var(--text)]">{volume}</span>
+                              {hasPR && (
+                                <span className="flex items-center gap-0.5 text-[8px] font-bold text-[var(--energy)] uppercase">
+                                  <Trophy size={8} /> PR
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
                   {!ex.isCompleted && (
                     <button 
                       onClick={() => addSet(ex.id)}
-                      className="w-full mt-4 py-2 border border-dashed border-slate-700 rounded-xl text-slate-500 hover:text-slate-300 hover:border-slate-500 transition-all flex items-center justify-center gap-2 text-xs font-bold"
+                      className="w-full mt-6 py-3 bg-[var(--surface-container)] rounded-2xl text-[var(--text)] transition-all flex items-center justify-center gap-2 text-xs font-bold active:scale-95 border border-[var(--outline)]/10"
                     >
-                      <Plus size={14} /> Add Set
+                      <Plus size={16} /> Add Set
                     </button>
                   )}
                 </div>
@@ -522,18 +515,18 @@ export const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({ workout, onClose, 
         {/* Add Exercise Button */}
         <button 
           onClick={() => setShowAddExercise(true)}
-          className="w-full py-4 bg-slate-800/50 border border-dashed border-slate-700 rounded-3xl text-slate-400 hover:text-white hover:border-passion/50 transition-all flex items-center justify-center gap-3 font-black uppercase tracking-widest text-sm"
+          className="w-full py-4 bg-[var(--surface)] border-2 border-dashed border-[var(--outline)]/20 rounded-[28px] text-[var(--outline)] hover:text-[var(--primary)] hover:border-[var(--primary)]/50 transition-all flex items-center justify-center gap-2 font-bold text-sm active:scale-95"
         >
           <Plus size={20} /> Add Exercise
         </button>
 
-        <div className="bg-card rounded-2xl p-4 border border-white/5 shadow-lg">
-          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Session Notes</label>
+        <div className="m3-card border border-[var(--outline)]/10">
+          <label className="block text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider mb-2">Session Notes</label>
           <textarea 
             value={notes}
             onChange={e => setNotes(e.target.value)}
-            placeholder="How did it feel? Any injuries?"
-            className="w-full bg-input border border-white/5 rounded-xl p-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 min-h-[100px]"
+            placeholder="How did it feel?"
+            className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-2xl p-4 text-sm font-medium text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 min-h-[120px]"
           />
         </div>
       </div>
@@ -545,23 +538,23 @@ export const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({ workout, onClose, 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-md flex items-center justify-center p-6"
+            className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6"
             onClick={() => setShowAddExercise(false)}
           >
             <motion.div 
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              className="bg-card w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-white/10"
+              className="bg-[var(--surface)] w-full max-w-sm rounded-[28px] p-6 shadow-2xl border border-[var(--outline)]/10"
               onClick={e => e.stopPropagation()}
             >
-              <h3 className="text-xl font-black text-white uppercase tracking-tighter mb-6">Add Exercise</h3>
+              <h3 className="text-xl font-bold text-[var(--text)] tracking-tight mb-6">Add Exercise</h3>
               <div className="max-h-[60vh] overflow-y-auto pr-2 no-scrollbar space-y-2">
                 {allExercises.map(name => (
                   <button 
                     key={name}
                     onClick={() => addNewExercise(name, 'Custom')}
-                    className="w-full text-left p-4 bg-slate-800 hover:bg-passion hover:text-white rounded-2xl text-sm font-bold transition-all"
+                    className="w-full text-left p-4 bg-[var(--surface-container)] hover:bg-[var(--primary)] hover:text-[var(--on-primary)] rounded-2xl text-sm font-bold transition-all"
                   >
                     {name}
                   </button>
@@ -569,7 +562,7 @@ export const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({ workout, onClose, 
               </div>
               <button 
                 onClick={() => setShowAddExercise(false)}
-                className="w-full mt-6 py-3 bg-slate-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs"
+                className="w-full mt-6 py-3 bg-[var(--surface-container)] text-[var(--text)] rounded-2xl font-bold text-xs"
               >
                 Cancel
               </button>
