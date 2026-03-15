@@ -1,18 +1,31 @@
 import React, { useMemo } from 'react';
 import { motion } from 'motion/react';
-import { Dumbbell, Activity, Utensils, Quote } from 'lucide-react';
+import { Dumbbell, Activity, Utensils, Quote, Flame, Zap, CheckCircle2 } from 'lucide-react';
 import { MOTIVATIONAL_QUOTES } from '../constants';
-import { View } from '../types';
+import { View, MealLog, CompletedWorkout, CardioLog } from '../types';
 
 interface HomeViewProps {
   onSelectOption: (view: View) => void;
   userName: string;
+  todayMeals: MealLog[];
+  todayWorkouts: CompletedWorkout[];
+  todayCardio: CardioLog[];
 }
 
-export const HomeView: React.FC<HomeViewProps> = ({ onSelectOption, userName }) => {
+export const HomeView: React.FC<HomeViewProps> = ({ 
+  onSelectOption, 
+  userName, 
+  todayMeals, 
+  todayWorkouts, 
+  todayCardio 
+}) => {
   const quote = useMemo(() => {
     return MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)];
   }, []);
+
+  const totalCalories = todayMeals.reduce((sum, m) => sum + m.calories, 0);
+  const workoutDone = todayWorkouts.length > 0;
+  const cardioDone = todayCardio.length > 0;
 
   const options = [
     {
@@ -66,6 +79,46 @@ export const HomeView: React.FC<HomeViewProps> = ({ onSelectOption, userName }) 
           </p>
         </motion.div>
       </header>
+
+      <div className="grid grid-cols-2 gap-3">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.3 }}
+          className="m3-card p-4 bg-[var(--surface-container)] border border-[var(--outline)]/10 flex flex-col justify-between"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider">Nutrition</span>
+            <Flame size={14} className="text-[#EA4335]" />
+          </div>
+          <div>
+            <span className="text-2xl font-bold text-[var(--text)]">{Math.round(totalCalories)}</span>
+            <span className="text-[10px] font-bold text-[var(--outline)] ml-1">kcal</span>
+          </div>
+        </motion.div>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.4 }}
+          className="m3-card p-4 bg-[var(--surface-container)] border border-[var(--outline)]/10 flex flex-col justify-between"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider">Activity</span>
+            <Zap size={14} className="text-[#FBBC05]" />
+          </div>
+          <div className="flex gap-2">
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center ${workoutDone ? 'bg-[#4285F4] text-white' : 'bg-[var(--outline)]/10 text-[var(--outline)]'}`}>
+              <Dumbbell size={12} />
+            </div>
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center ${cardioDone ? 'bg-[#34A853] text-white' : 'bg-[var(--outline)]/10 text-[var(--outline)]'}`}>
+              <Activity size={12} />
+            </div>
+            {(workoutDone || cardioDone) && (
+              <CheckCircle2 size={14} className="text-[#34A853] ml-auto self-center" />
+            )}
+          </div>
+        </motion.div>
+      </div>
 
       <div className="grid grid-cols-1 gap-4">
         {options.map((option, idx) => (

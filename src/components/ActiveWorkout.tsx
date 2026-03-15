@@ -14,9 +14,19 @@ interface ActiveWorkoutProps {
   onFinish: (exercises: ActiveExercise[], duration: number, notes: string, photo?: string) => void;
   prs: PersonalRecord[];
   customExercises: string[];
+  initialExercises?: ActiveExercise[];
+  onUpdate?: (exercises: ActiveExercise[], elapsed: number) => void;
 }
 
-export const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({ workout, onClose, onFinish, prs, customExercises }) => {
+export const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({ 
+  workout, 
+  onClose, 
+  onFinish, 
+  prs, 
+  customExercises,
+  initialExercises,
+  onUpdate
+}) => {
   const [startTime] = useState(Date.now());
   const [elapsed, setElapsed] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -24,6 +34,7 @@ export const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({ workout, onClose, 
   const [showAddExercise, setShowAddExercise] = useState(false);
   
   const [exercises, setExercises] = useState<ActiveExercise[]>(() => {
+    if (initialExercises && initialExercises.length > 0) return initialExercises;
     return workout.groups.flatMap(group => {
       const shuffled = [...group.pool].sort(() => 0.5 - Math.random());
       return shuffled.slice(0, group.count).map(name => {
@@ -44,6 +55,11 @@ export const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({ workout, onClose, 
       });
     });
   });
+
+  // Notify parent of updates for persistence
+  useEffect(() => {
+    onUpdate?.(exercises, elapsed);
+  }, [exercises, elapsed, onUpdate]);
 
   const [restTimer, setRestTimer] = useState<number | null>(null);
   const [initialRest, setInitialRest] = useState<number>(0);

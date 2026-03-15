@@ -97,14 +97,3 @@ export interface CardioLog {
   calories?: number;
   notes?: string;
 }
-
-export interface StorageData {
-  history: CompletedWorkout[];
-  prs: PersonalRecord[];
-  gymDays: string[];
-  customWorkouts: WorkoutDay[];
-  customExercises: string[];
-  bodyMetrics: BodyMetrics[];
-  mealLogs: MealLog[];
-  cardioLogs: CardioLog[];
-}

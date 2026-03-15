@@ -45,6 +45,7 @@ export default function App() {
   const [mealLogs, setMealLogs] = useState<MealLog[]>([]);
   const [cardioLogs, setCardioLogs] = useState<CardioLog[]>([]);
   const [activeWorkout, setActiveWorkout] = useState<WorkoutDay | null>(null);
+  const [activeExercises, setActiveExercises] = useState<ActiveExercise[]>([]);
   const [showCreateWorkout, setShowCreateWorkout] = useState(false);
   const [newExerciseName, setNewExerciseName] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -66,6 +67,12 @@ export default function App() {
     setBodyMetrics(data.bodyMetrics || []);
     setMealLogs(data.mealLogs || []);
     setCardioLogs(data.cardioLogs || []);
+    setActiveWorkout(data.activeWorkout || null);
+    setActiveExercises(data.activeExercises || []);
+    
+    if (data.activeWorkout) {
+      setView('active');
+    }
     
     // Calculate XP and Level based on history
     const totalXp = data.history.length * 100;
@@ -94,12 +101,19 @@ export default function App() {
       ? gymDays.filter(d => d !== date)
       : [...gymDays, date];
     setGymDays(newGymDays);
-    saveStorageData(history, prs, newGymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, cardioLogs);
+    saveStorageData(history, prs, newGymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, cardioLogs, activeWorkout, activeExercises);
   };
 
   const handleStartWorkout = (workout: WorkoutDay) => {
     setActiveWorkout(workout);
+    setActiveExercises([]);
     setView('active');
+    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, cardioLogs, workout, []);
+  };
+
+  const handleActiveWorkoutUpdate = (exercises: ActiveExercise[]) => {
+    setActiveExercises(exercises);
+    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, cardioLogs, activeWorkout, exercises);
   };
 
   const handleFinishWorkout = (exercises: ActiveExercise[], duration: number, notes: string, photo?: string) => {
@@ -139,59 +153,60 @@ export default function App() {
     setHistory(newHistory);
     setPrs(newPrs);
     setGymDays(newGymDays);
-    saveStorageData(newHistory, newPrs, newGymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, cardioLogs);
     setActiveWorkout(null);
+    setActiveExercises([]);
+    saveStorageData(newHistory, newPrs, newGymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, cardioLogs, null, []);
     setView('history');
   };
 
   const handleAddCustomWorkout = (workout: WorkoutDay) => {
     const newCustom = [...customWorkouts, workout];
     setCustomWorkouts(newCustom);
-    saveStorageData(history, prs, gymDays, newCustom, customExercises, bodyMetrics, mealLogs, cardioLogs);
+    saveStorageData(history, prs, gymDays, newCustom, customExercises, bodyMetrics, mealLogs, cardioLogs, activeWorkout, activeExercises);
   };
 
   const handleAddCustomExercise = () => {
     if (!newExerciseName) return;
     const newCustom = [...customExercises, newExerciseName];
     setCustomExercises(newCustom);
-    saveStorageData(history, prs, gymDays, customWorkouts, newCustom, bodyMetrics, mealLogs, cardioLogs);
+    saveStorageData(history, prs, gymDays, customWorkouts, newCustom, bodyMetrics, mealLogs, cardioLogs, activeWorkout, activeExercises);
     setNewExerciseName('');
   };
 
   const handleSaveMetrics = (m: BodyMetricsType) => {
     const newMetrics = [m, ...bodyMetrics];
     setBodyMetrics(newMetrics);
-    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, newMetrics, mealLogs, cardioLogs);
+    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, newMetrics, mealLogs, cardioLogs, activeWorkout, activeExercises);
   };
 
   const handleDeleteMetrics = (id: string) => {
     const newMetrics = bodyMetrics.filter(m => m.id !== id);
     setBodyMetrics(newMetrics);
-    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, newMetrics, mealLogs, cardioLogs);
+    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, newMetrics, mealLogs, cardioLogs, activeWorkout, activeExercises);
   };
 
   const handleSaveMeal = (log: MealLog) => {
     const newLogs = [log, ...mealLogs];
     setMealLogs(newLogs);
-    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, newLogs, cardioLogs);
+    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, newLogs, cardioLogs, activeWorkout, activeExercises);
   };
 
   const handleDeleteMeal = (id: string) => {
     const newLogs = mealLogs.filter(l => l.id !== id);
     setMealLogs(newLogs);
-    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, newLogs, cardioLogs);
+    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, newLogs, cardioLogs, activeWorkout, activeExercises);
   };
 
   const handleSaveCardio = (log: CardioLog) => {
     const newLogs = [log, ...cardioLogs];
     setCardioLogs(newLogs);
-    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, newLogs);
+    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, newLogs, activeWorkout, activeExercises);
   };
 
   const handleDeleteCardio = (id: string) => {
     const newLogs = cardioLogs.filter(l => l.id !== id);
     setCardioLogs(newLogs);
-    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, newLogs);
+    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, newLogs, activeWorkout, activeExercises);
   };
 
   const allAvailableExercises = useMemo(() => {
@@ -276,7 +291,13 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
             >
-              <HomeView onSelectOption={setView} userName="Helstan" />
+              <HomeView 
+                onSelectOption={setView} 
+                userName="Helstan" 
+                todayMeals={mealLogs.filter(l => l.date.split('T')[0] === new Date().toISOString().split('T')[0])}
+                todayWorkouts={history.filter(l => l.date.split('T')[0] === new Date().toISOString().split('T')[0])}
+                todayCardio={cardioLogs.filter(l => l.date.split('T')[0] === new Date().toISOString().split('T')[0])}
+              />
             </motion.div>
           )}
 
@@ -386,7 +407,12 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
             >
-              <ProgressCharts history={history} bodyMetrics={bodyMetrics} />
+              <ProgressCharts 
+                history={history} 
+                bodyMetrics={bodyMetrics} 
+                cardioLogs={cardioLogs}
+                mealLogs={mealLogs}
+              />
             </motion.div>
           )}
 
@@ -418,9 +444,13 @@ export default function App() {
       {view === 'active' && activeWorkout && (
         <ActiveWorkout 
           workout={activeWorkout} 
+          initialExercises={activeExercises}
+          onUpdate={handleActiveWorkoutUpdate}
           onClose={() => {
             if (confirm('Are you sure you want to cancel this workout? Progress will be lost.')) {
               setActiveWorkout(null);
+              setActiveExercises([]);
+              saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, cardioLogs, null, []);
               setView('days');
             }
           }}

@@ -49,6 +49,15 @@ export const MealTracker: React.FC<MealTrackerProps> = ({ logs, onSave, onDelete
     fats: acc.fats + log.fats
   }), { calories: 0, protein: 0, carbs: 0, fats: 0 });
 
+  const groupedLogs = logs.reduce((acc, log) => {
+    const date = log.date.split('T')[0];
+    if (!acc[date]) acc[date] = [];
+    acc[date].push(log);
+    return acc;
+  }, {} as Record<string, MealLog[]>);
+
+  const sortedDates = Object.keys(groupedLogs).sort((a, b) => b.localeCompare(a));
+
   return (
     <div className="space-y-8">
       <header className="flex items-center justify-between">
@@ -63,43 +72,95 @@ export const MealTracker: React.FC<MealTrackerProps> = ({ logs, onSave, onDelete
           onClick={() => setShowAdd(!showAdd)}
           className="w-12 h-12 rounded-2xl bg-[#FBBC05] text-white flex items-center justify-center shadow-lg active:scale-95 transition-all"
         >
-          <Plus size={28} />
+          <Plus size={28} className={`transition-transform duration-300 ${showAdd ? 'rotate-45' : ''}`} />
         </button>
       </header>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div className="m3-card p-4 bg-[var(--surface-container)] border border-[var(--outline)]/10 col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xs font-bold text-[var(--outline)] uppercase tracking-wider">Today's Summary</h3>
-            <Flame size={16} className="text-[#EA4335]" />
-          </div>
-          <div className="flex items-end justify-between">
+      <div className="grid grid-cols-1 gap-3">
+        <div className="m3-card p-6 bg-[var(--surface-container)] border border-[var(--outline)]/10">
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <span className="text-4xl font-bold text-[var(--text)]">{Math.round(totals.calories)}</span>
-              <span className="text-sm font-bold text-[var(--outline)] ml-2">kcal</span>
+              <h3 className="text-xs font-bold text-[var(--outline)] uppercase tracking-wider mb-1">Today's Intake</h3>
+              <p className="text-[10px] font-bold text-[var(--outline)] opacity-60">
+                {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
+              </p>
+            </div>
+            <div className="w-12 h-12 rounded-full bg-[#EA4335]/10 flex items-center justify-center">
+              <Flame size={24} className="text-[#EA4335]" />
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-4 mt-6">
-            <div className="space-y-1">
-              <div className="flex items-center gap-1 text-[10px] font-bold text-[var(--outline)] uppercase">
-                <Beef size={10} className="text-[#4285F4]" />
-                Protein
+          
+          <div className="flex items-center gap-8 mb-8">
+            <div className="relative w-24 h-24">
+              <svg className="w-full h-full transform -rotate-90">
+                <circle
+                  cx="48"
+                  cy="48"
+                  r="40"
+                  fill="transparent"
+                  stroke="currentColor"
+                  strokeWidth="8"
+                  className="text-[var(--outline)]/10"
+                />
+                <motion.circle
+                  cx="48"
+                  cy="48"
+                  r="40"
+                  fill="transparent"
+                  stroke="#EA4335"
+                  strokeWidth="8"
+                  strokeDasharray={251.2}
+                  initial={{ strokeDashoffset: 251.2 }}
+                  animate={{ strokeDashoffset: 251.2 - (Math.min(totals.calories / 2500, 1) * 251.2) }}
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-xl font-bold text-[var(--text)]">{Math.round(totals.calories)}</span>
+                <span className="text-[8px] font-bold text-[var(--outline)] uppercase">kcal</span>
               </div>
-              <div className="text-sm font-bold text-[var(--text)]">{Math.round(totals.protein)}g</div>
             </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-1 text-[10px] font-bold text-[var(--outline)] uppercase">
-                <Wheat size={10} className="text-[#FBBC05]" />
-                Carbs
+            
+            <div className="flex-1 grid grid-cols-1 gap-3">
+              <div className="space-y-1">
+                <div className="flex justify-between text-[10px] font-bold uppercase">
+                  <span className="text-[var(--outline)]">Protein</span>
+                  <span className="text-[var(--text)]">{Math.round(totals.protein)}g</span>
+                </div>
+                <div className="h-1.5 bg-[var(--outline)]/10 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min((totals.protein / 150) * 100, 100)}%` }}
+                    className="h-full bg-[#4285F4]"
+                  />
+                </div>
               </div>
-              <div className="text-sm font-bold text-[var(--text)]">{Math.round(totals.carbs)}g</div>
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-1 text-[10px] font-bold text-[var(--outline)] uppercase">
-                <Droplets size={10} className="text-[#34A853]" />
-                Fats
+              <div className="space-y-1">
+                <div className="flex justify-between text-[10px] font-bold uppercase">
+                  <span className="text-[var(--outline)]">Carbs</span>
+                  <span className="text-[var(--text)]">{Math.round(totals.carbs)}g</span>
+                </div>
+                <div className="h-1.5 bg-[var(--outline)]/10 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min((totals.carbs / 300) * 100, 100)}%` }}
+                    className="h-full bg-[#FBBC05]"
+                  />
+                </div>
               </div>
-              <div className="text-sm font-bold text-[var(--text)]">{Math.round(totals.fats)}g</div>
+              <div className="space-y-1">
+                <div className="flex justify-between text-[10px] font-bold uppercase">
+                  <span className="text-[var(--outline)]">Fats</span>
+                  <span className="text-[var(--text)]">{Math.round(totals.fats)}g</span>
+                </div>
+                <div className="h-1.5 bg-[var(--outline)]/10 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min((totals.fats / 80) * 100, 100)}%` }}
+                    className="h-full bg-[#34A853]"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -122,7 +183,7 @@ export const MealTracker: React.FC<MealTrackerProps> = ({ logs, onSave, onDelete
                     type="text" 
                     value={name}
                     onChange={e => setName(e.target.value)}
-                    placeholder="Breakfast / Chicken Salad"
+                    placeholder="e.g. Grilled Chicken & Rice"
                     className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#FBBC05]/20"
                   />
                 </div>
@@ -133,7 +194,7 @@ export const MealTracker: React.FC<MealTrackerProps> = ({ logs, onSave, onDelete
                       type="number" 
                       value={calories}
                       onChange={e => setCalories(e.target.value)}
-                      placeholder="500"
+                      placeholder="0"
                       className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#FBBC05]/20"
                     />
                   </div>
@@ -143,7 +204,7 @@ export const MealTracker: React.FC<MealTrackerProps> = ({ logs, onSave, onDelete
                       type="number" 
                       value={protein}
                       onChange={e => setProtein(e.target.value)}
-                      placeholder="30"
+                      placeholder="0"
                       className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#FBBC05]/20"
                     />
                   </div>
@@ -153,7 +214,7 @@ export const MealTracker: React.FC<MealTrackerProps> = ({ logs, onSave, onDelete
                       type="number" 
                       value={carbs}
                       onChange={e => setCarbs(e.target.value)}
-                      placeholder="50"
+                      placeholder="0"
                       className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#FBBC05]/20"
                     />
                   </div>
@@ -163,7 +224,7 @@ export const MealTracker: React.FC<MealTrackerProps> = ({ logs, onSave, onDelete
                       type="number" 
                       value={fats}
                       onChange={e => setFats(e.target.value)}
-                      placeholder="15"
+                      placeholder="0"
                       className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#FBBC05]/20"
                     />
                   </div>
@@ -180,61 +241,64 @@ export const MealTracker: React.FC<MealTrackerProps> = ({ logs, onSave, onDelete
         )}
       </AnimatePresence>
 
-      <div className="space-y-4">
+      <div className="space-y-6">
         <div className="flex items-center gap-2 px-1">
           <History size={16} className="text-[var(--outline)]" />
-          <h3 className="text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider">Recent Meals</h3>
+          <h3 className="text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider">Meal History</h3>
         </div>
         
-        {logs.length === 0 ? (
+        {sortedDates.length === 0 ? (
           <div className="m3-card p-12 text-center border border-[var(--outline)]/10">
             <p className="text-[var(--outline)] font-bold">No meals logged yet.</p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {logs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(log => (
-              <motion.div 
-                key={log.id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="m3-card p-4 border border-[var(--outline)]/10 flex items-center justify-between group"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-[var(--surface-container)] flex items-center justify-center text-[#FBBC05]">
-                    <Utensils size={24} />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-[var(--text)]">{log.name}</h4>
-                    <div className="flex items-center gap-3 mt-1">
-                      <div className="text-[10px] font-bold text-[var(--outline)]">
-                        {log.calories} kcal
-                      </div>
-                      <div className="text-[10px] font-bold text-[var(--outline)]">
-                        P: {log.protein}g
-                      </div>
-                      <div className="text-[10px] font-bold text-[var(--outline)]">
-                        C: {log.carbs}g
-                      </div>
-                      <div className="text-[10px] font-bold text-[var(--outline)]">
-                        F: {log.fats}g
-                      </div>
-                    </div>
+          <div className="space-y-8">
+            {sortedDates.map(date => (
+              <div key={date} className="space-y-3">
+                <div className="flex items-center justify-between px-1">
+                  <h4 className="text-[10px] font-bold text-[var(--outline)] uppercase tracking-widest">
+                    {date === today ? 'Today' : new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </h4>
+                  <div className="text-[10px] font-bold text-[var(--outline)] opacity-40">
+                    {groupedLogs[date].length} items
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="text-right mr-2">
-                    <div className="text-[10px] font-bold text-[var(--outline)] uppercase">
-                      {new Date(log.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => onDelete(log.id)}
-                    className="p-2 text-[var(--outline)] hover:text-[#EA4335] opacity-0 group-hover:opacity-100 transition-all"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                <div className="space-y-3">
+                  {groupedLogs[date].map(log => (
+                    <motion.div 
+                      key={log.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="m3-card p-4 border border-[var(--outline)]/10 flex items-center justify-between group bg-[var(--surface)]"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-[var(--surface-container)] flex items-center justify-center text-[#FBBC05]">
+                          <Utensils size={20} />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold text-[var(--text)]">{log.name}</h4>
+                          <div className="flex items-center gap-3 mt-1">
+                            <div className="text-[10px] font-bold text-[var(--outline)]">
+                              {log.calories} kcal
+                            </div>
+                            <div className="flex gap-2">
+                              <span className="text-[8px] font-bold text-[#4285F4] uppercase">P: {log.protein}g</span>
+                              <span className="text-[8px] font-bold text-[#FBBC05] uppercase">C: {log.carbs}g</span>
+                              <span className="text-[8px] font-bold text-[#34A853] uppercase">F: {log.fats}g</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => onDelete(log.id)}
+                        className="p-2 text-[var(--outline)] hover:text-[#EA4335] opacity-0 group-hover:opacity-100 transition-all"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </motion.div>
+                  ))}
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         )}

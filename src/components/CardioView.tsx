@@ -45,6 +45,14 @@ export const CardioView: React.FC<CardioViewProps> = ({ logs, onSave, onDelete }
 
   const cardioDays = logs.map(l => l.date.split('T')[0]);
 
+  const cardioTypes = [
+    { name: 'Swimming', icon: '🏊' },
+    { name: 'Jogging', icon: '🏃' },
+    { name: 'Zumba', icon: '💃' },
+    { name: 'Pilates', icon: '🧘' },
+    { name: 'Cycling', icon: '🚴' }
+  ];
+
   return (
     <div className="space-y-8">
       <header className="flex items-center justify-between">
@@ -59,7 +67,7 @@ export const CardioView: React.FC<CardioViewProps> = ({ logs, onSave, onDelete }
           onClick={() => setShowAdd(!showAdd)}
           className="w-12 h-12 rounded-2xl bg-[#34A853] text-white flex items-center justify-center shadow-lg active:scale-95 transition-all"
         >
-          <Plus size={28} />
+          <Plus size={28} className={`transition-transform duration-300 ${showAdd ? 'rotate-45' : ''}`} />
         </button>
       </header>
 
@@ -73,16 +81,35 @@ export const CardioView: React.FC<CardioViewProps> = ({ logs, onSave, onDelete }
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
-            <div className="m3-card p-6 border border-[var(--outline)]/10 space-y-4">
-              <h3 className="text-sm font-bold text-[var(--text)] uppercase tracking-wider">Log Activity</h3>
+            <div className="m3-card p-6 border border-[var(--outline)]/10 space-y-6">
+              <div className="space-y-3">
+                <label className="text-[10px] font-bold text-[var(--outline)] uppercase px-1">Quick Select</label>
+                <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                  {cardioTypes.map(type => (
+                    <button
+                      key={type.name}
+                      onClick={() => setExerciseName(type.name)}
+                      className={`flex-shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                        exerciseName === type.name 
+                          ? 'bg-[#34A853] text-white border-[#34A853]' 
+                          : 'bg-[var(--surface-container)] text-[var(--text)] border-[var(--outline)]/10'
+                      }`}
+                    >
+                      <span className="mr-2">{type.icon}</span>
+                      {type.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2 space-y-1">
-                  <label className="text-[10px] font-bold text-[var(--outline)] uppercase px-1">Exercise (e.g. Swimming, Jogging)</label>
+                  <label className="text-[10px] font-bold text-[var(--outline)] uppercase px-1">Activity Name</label>
                   <input 
                     type="text" 
                     value={exerciseName}
                     onChange={e => setExerciseName(e.target.value)}
-                    placeholder="Jogging"
+                    placeholder="e.g. Morning Run"
                     className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#34A853]/20"
                   />
                 </div>

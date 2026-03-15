@@ -1,4 +1,12 @@
-import { CompletedWorkout, PersonalRecord, SetEntry, StorageData } from './types';
+import { 
+  CompletedWorkout, 
+  PersonalRecord, 
+  WorkoutDay, 
+  ActiveExercise, 
+  BodyMetrics, 
+  MealLog, 
+  CardioLog 
+} from './types';
 import { WORKOUT_SPLIT } from './constants';
 
 export const generateDemoData = () => {
@@ -75,6 +83,19 @@ export const generateDemoData = () => {
   return { history: history.reverse(), prs, gymDays };
 };
 
+export interface StorageData {
+  history: CompletedWorkout[];
+  prs: PersonalRecord[];
+  gymDays: string[];
+  customWorkouts: WorkoutDay[];
+  customExercises: string[];
+  bodyMetrics: BodyMetrics[];
+  mealLogs: MealLog[];
+  cardioLogs: CardioLog[];
+  activeWorkout?: WorkoutDay | null;
+  activeExercises?: ActiveExercise[];
+}
+
 export const getStorageData = (): StorageData => {
   const history = localStorage.getItem('gym_history');
   const prs = localStorage.getItem('gym_prs');
@@ -84,8 +105,11 @@ export const getStorageData = (): StorageData => {
   const bodyMetrics = localStorage.getItem('gym_body_metrics');
   const mealLogs = localStorage.getItem('gym_meal_logs');
   const cardioLogs = localStorage.getItem('gym_cardio_logs');
+  const activeWorkout = localStorage.getItem('gym_active_workout');
+  const activeExercises = localStorage.getItem('gym_active_exercises');
 
-  if (!history || !prs || !gymDays) {
+  // Only generate demo data if history is completely empty/missing
+  if (!history) {
     const demo = generateDemoData();
     const initialData: StorageData = {
       ...demo,
@@ -93,28 +117,30 @@ export const getStorageData = (): StorageData => {
       customExercises: [],
       bodyMetrics: [],
       mealLogs: [],
-      cardioLogs: []
+      cardioLogs: [],
+      activeWorkout: null,
+      activeExercises: []
     };
-    localStorage.setItem('gym_history', JSON.stringify(initialData.history));
-    localStorage.setItem('gym_prs', JSON.stringify(initialData.prs));
-    localStorage.setItem('gym_days', JSON.stringify(initialData.gymDays));
-    localStorage.setItem('gym_custom_workouts', JSON.stringify(initialData.customWorkouts));
-    localStorage.setItem('gym_custom_exercises', JSON.stringify(initialData.customExercises));
-    localStorage.setItem('gym_body_metrics', JSON.stringify(initialData.bodyMetrics));
-    localStorage.setItem('gym_meal_logs', JSON.stringify(initialData.mealLogs));
-    localStorage.setItem('gym_cardio_logs', JSON.stringify(initialData.cardioLogs));
+    saveStorageData(
+      initialData.history, 
+      initialData.prs, 
+      initialData.gymDays, 
+      [], [], [], [], [], null, []
+    );
     return initialData;
   }
 
   return {
     history: JSON.parse(history) as CompletedWorkout[],
-    prs: JSON.parse(prs) as PersonalRecord[],
-    gymDays: JSON.parse(gymDays) as string[],
+    prs: prs ? JSON.parse(prs) : [],
+    gymDays: gymDays ? JSON.parse(gymDays) : [],
     customWorkouts: customWorkouts ? JSON.parse(customWorkouts) : [],
     customExercises: customExercises ? JSON.parse(customExercises) : [],
     bodyMetrics: bodyMetrics ? JSON.parse(bodyMetrics) : [],
     mealLogs: mealLogs ? JSON.parse(mealLogs) : [],
-    cardioLogs: cardioLogs ? JSON.parse(cardioLogs) : []
+    cardioLogs: cardioLogs ? JSON.parse(cardioLogs) : [],
+    activeWorkout: activeWorkout ? JSON.parse(activeWorkout) : null,
+    activeExercises: activeExercises ? JSON.parse(activeExercises) : []
   };
 };
 
@@ -126,7 +152,9 @@ export const saveStorageData = (
   customExercises: string[] = [],
   bodyMetrics: any[] = [],
   mealLogs: any[] = [],
-  cardioLogs: any[] = []
+  cardioLogs: any[] = [],
+  activeWorkout: any = null,
+  activeExercises: any[] = []
 ) => {
   localStorage.setItem('gym_history', JSON.stringify(history));
   localStorage.setItem('gym_prs', JSON.stringify(prs));
@@ -136,4 +164,6 @@ export const saveStorageData = (
   localStorage.setItem('gym_body_metrics', JSON.stringify(bodyMetrics));
   localStorage.setItem('gym_meal_logs', JSON.stringify(mealLogs));
   localStorage.setItem('gym_cardio_logs', JSON.stringify(cardioLogs));
+  localStorage.setItem('gym_active_workout', JSON.stringify(activeWorkout));
+  localStorage.setItem('gym_active_exercises', JSON.stringify(activeExercises));
 };

@@ -1,19 +1,26 @@
 import React, { useState, useMemo } from 'react';
 import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, AreaChart, Area
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, AreaChart, Area, BarChart, Bar
 } from 'recharts';
 import { motion, AnimatePresence } from 'motion/react';
-import { TrendingUp, Activity, Target, ChevronRight, BarChart3, Calendar } from 'lucide-react';
-import { View, WorkoutDay, CompletedWorkout, PersonalRecord, ActiveExercise, BodyMetrics as BodyMetricsType } from '../types';
+import { TrendingUp, Activity, Target, ChevronRight, BarChart3, Calendar, Utensils, Flame, Clock } from 'lucide-react';
+import { View, WorkoutDay, CompletedWorkout, PersonalRecord, ActiveExercise, BodyMetrics as BodyMetricsType, CardioLog, MealLog } from '../types';
 
 interface ProgressChartsProps {
   history: CompletedWorkout[];
   bodyMetrics: BodyMetricsType[];
+  cardioLogs: CardioLog[];
+  mealLogs: MealLog[];
 }
 
-export const ProgressCharts: React.FC<ProgressChartsProps> = ({ history, bodyMetrics }) => {
+export const ProgressCharts: React.FC<ProgressChartsProps> = ({ 
+  history, 
+  bodyMetrics, 
+  cardioLogs, 
+  mealLogs 
+}) => {
   const [selectedExercise, setSelectedExercise] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'performance' | 'metrics'>('performance');
+  const [activeTab, setActiveTab] = useState<'performance' | 'cardio' | 'nutrition' | 'metrics'>('performance');
   const [selectedMetric, setSelectedMetric] = useState<keyof BodyMetricsType>('weight');
 
   // Get list of all exercises performed in history
@@ -88,14 +95,52 @@ export const ProgressCharts: React.FC<ProgressChartsProps> = ({ history, bodyMet
       }));
   }, [bodyMetrics, selectedMetric]);
 
-  if (history.length === 0) {
+  const cardioChartData = useMemo(() => {
+    return [...cardioLogs]
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .map(l => ({
+        date: new Date(l.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        fullDate: l.date,
+        duration: Math.round(l.duration / 60),
+        distance: l.distance || 0,
+        calories: l.calories || 0
+      }));
+  }, [cardioLogs]);
+
+  const nutritionChartData = useMemo(() => {
+    const grouped = mealLogs.reduce((acc, log) => {
+      const date = log.date.split('T')[0];
+      if (!acc[date]) acc[date] = { calories: 0, protein: 0, carbs: 0, fats: 0 };
+      acc[date].calories += log.calories;
+      acc[date].protein += log.protein;
+      acc[date].carbs += log.carbs;
+      acc[date].fats += log.fats;
+      return acc;
+    }, {} as Record<string, { calories: number; protein: number; carbs: number; fats: number }>);
+
+    return Object.keys(grouped)
+      .sort()
+      .map(date => {
+        const data = grouped[date];
+        return {
+          date: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          fullDate: date,
+          calories: data.calories,
+          protein: data.protein,
+          carbs: data.carbs,
+          fats: data.fats
+        };
+      });
+  }, [mealLogs]);
+
+  if (history.length === 0 && cardioLogs.length === 0 && mealLogs.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center px-6">
         <div className="w-20 h-20 bg-[var(--surface-container)] rounded-full flex items-center justify-center text-[var(--outline)] mb-6">
           <BarChart3 size={40} />
         </div>
         <h3 className="text-xl font-bold text-[var(--text)] tracking-tight mb-2">No Data Yet</h3>
-        <p className="text-[var(--outline)] text-sm max-w-[280px]">Complete your first workout to start tracking your progress visually.</p>
+        <p className="text-[var(--outline)] text-sm max-w-[280px]">Start logging your workouts, cardio, or meals to see your progress visually.</p>
       </div>
     );
   }
@@ -111,22 +156,34 @@ export const ProgressCharts: React.FC<ProgressChartsProps> = ({ history, bodyMet
       </header>
 
       {/* Tab Switcher */}
-      <div className="flex bg-[var(--surface-container)] p-1 rounded-2xl border border-[var(--outline)]/10">
+      <div className="flex bg-[var(--surface-container)] p-1 rounded-2xl border border-[var(--outline)]/10 overflow-x-auto no-scrollbar">
         <button 
           onClick={() => setActiveTab('performance')}
-          className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'performance' ? 'bg-[var(--surface)] text-[var(--primary)] shadow-sm' : 'text-[var(--outline)]'}`}
+          className={`flex-shrink-0 px-4 py-2.5 rounded-xl text-[10px] font-bold transition-all ${activeTab === 'performance' ? 'bg-[var(--surface)] text-[var(--primary)] shadow-sm' : 'text-[var(--outline)]'}`}
         >
           Workouts
         </button>
         <button 
-          onClick={() => setActiveTab('metrics')}
-          className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'metrics' ? 'bg-[var(--surface)] text-[var(--primary)] shadow-sm' : 'text-[var(--outline)]'}`}
+          onClick={() => setActiveTab('cardio')}
+          className={`flex-shrink-0 px-4 py-2.5 rounded-xl text-[10px] font-bold transition-all ${activeTab === 'cardio' ? 'bg-[var(--surface)] text-[var(--primary)] shadow-sm' : 'text-[var(--outline)]'}`}
         >
-          Body Metrics
+          Cardio
+        </button>
+        <button 
+          onClick={() => setActiveTab('nutrition')}
+          className={`flex-shrink-0 px-4 py-2.5 rounded-xl text-[10px] font-bold transition-all ${activeTab === 'nutrition' ? 'bg-[var(--surface)] text-[var(--primary)] shadow-sm' : 'text-[var(--outline)]'}`}
+        >
+          Nutrition
+        </button>
+        <button 
+          onClick={() => setActiveTab('metrics')}
+          className={`flex-shrink-0 px-4 py-2.5 rounded-xl text-[10px] font-bold transition-all ${activeTab === 'metrics' ? 'bg-[var(--surface)] text-[var(--primary)] shadow-sm' : 'text-[var(--outline)]'}`}
+        >
+          Metrics
         </button>
       </div>
 
-      {activeTab === 'performance' ? (
+      {activeTab === 'performance' && (
         <>
           {/* Exercise Selector */}
           <div className="m3-card p-4 border border-[var(--outline)]/10">
@@ -286,32 +343,6 @@ export const ProgressCharts: React.FC<ProgressChartsProps> = ({ history, bodyMet
                   </ResponsiveContainer>
                 </div>
               </motion.div>
-
-              {/* Stats Grid */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="m3-card p-5 border border-[var(--outline)]/10">
-                  <span className="text-[9px] font-bold text-[var(--outline)] uppercase tracking-wider block mb-1">Starting Point</span>
-                  <span className="text-xl font-bold text-[var(--text)]">
-                    {chartData[0].isCardio ? `${chartData[0].distance}km` : `${chartData[0].weight}kg`}
-                  </span>
-                  <div className="mt-2 flex items-center gap-1 text-[10px] font-bold text-[var(--outline)]">
-                    <Calendar size={10} />
-                    {chartData[0].date}
-                  </div>
-                </div>
-                <div className="m3-card p-5 border border-[var(--outline)]/10">
-                  <span className="text-[9px] font-bold text-[var(--outline)] uppercase tracking-wider block mb-1">Current Best</span>
-                  <span className="text-xl font-bold text-[var(--primary)]">
-                    {chartData[0].isCardio 
-                      ? `${Math.max(...chartData.map(d => d.distance || 0))}km` 
-                      : `${Math.max(...chartData.map(d => d.weight || 0))}kg`}
-                  </span>
-                  <div className="mt-2 flex items-center gap-1 text-[10px] font-bold text-[var(--success)]">
-                    <TrendingUp size={10} />
-                    Progress Tracked
-                  </div>
-                </div>
-              </div>
             </div>
           ) : (
             <div className="m3-card p-12 text-center border border-[var(--outline)]/10">
@@ -319,7 +350,199 @@ export const ProgressCharts: React.FC<ProgressChartsProps> = ({ history, bodyMet
             </div>
           )}
         </>
-      ) : (
+      )}
+
+      {activeTab === 'cardio' && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="m3-card p-4 bg-[var(--surface-container)] border border-[var(--outline)]/10">
+              <span className="text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider">Total Distance</span>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-2xl font-bold text-[var(--text)]">
+                  {cardioLogs.reduce((acc, l) => acc + (l.distance || 0), 0).toFixed(1)}
+                </span>
+                <span className="text-[10px] font-bold text-[var(--outline)]">km</span>
+              </div>
+            </div>
+            <div className="m3-card p-4 bg-[var(--surface-container)] border border-[var(--outline)]/10">
+              <span className="text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider">Total Calories</span>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-2xl font-bold text-[var(--text)]">
+                  {cardioLogs.reduce((acc, l) => acc + (l.calories || 0), 0)}
+                </span>
+                <span className="text-[10px] font-bold text-[var(--outline)]">kcal</span>
+              </div>
+            </div>
+          </div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="m3-card p-6 border border-[var(--outline)]/10"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold text-[#34A853] uppercase tracking-wider">Endurance</span>
+                <span className="text-xl font-bold text-[var(--text)] tracking-tight">Distance Over Time</span>
+              </div>
+              <div className="bg-[var(--surface-container)] p-2 rounded-xl text-[#34A853]">
+                <Activity size={18} />
+              </div>
+            </div>
+            
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={cardioChartData}>
+                  <defs>
+                    <linearGradient id="colorCardio" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#34A853" stopOpacity={0.15}/>
+                      <stop offset="95%" stopColor="#34A853" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--outline)" strokeOpacity={0.1} vertical={false} />
+                  <XAxis dataKey="date" stroke="var(--outline)" fontSize={10} tickLine={false} axisLine={false} dy={10} />
+                  <YAxis stroke="var(--outline)" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}km`} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--outline)', borderRadius: '16px' }}
+                    itemStyle={{ color: '#34A853' }}
+                  />
+                  <Area type="monotone" dataKey="distance" stroke="#34A853" strokeWidth={3} fillOpacity={1} fill="url(#colorCardio)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="m3-card p-6 border border-[var(--outline)]/10"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold text-[#4285F4] uppercase tracking-wider">Time</span>
+                <span className="text-xl font-bold text-[var(--text)] tracking-tight">Duration Trend</span>
+              </div>
+              <div className="bg-[var(--surface-container)] p-2 rounded-xl text-[#4285F4]">
+                <Clock size={18} />
+              </div>
+            </div>
+            
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={cardioChartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--outline)" strokeOpacity={0.1} vertical={false} />
+                  <XAxis dataKey="date" stroke="var(--outline)" fontSize={10} tickLine={false} axisLine={false} dy={10} />
+                  <YAxis stroke="var(--outline)" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}m`} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--outline)', borderRadius: '16px' }}
+                    itemStyle={{ color: '#4285F4' }}
+                  />
+                  <Line type="monotone" dataKey="duration" stroke="#4285F4" strokeWidth={3} dot={{ r: 4, fill: '#4285F4' }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {activeTab === 'nutrition' && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="m3-card p-4 bg-[var(--surface-container)] border border-[var(--outline)]/10">
+              <span className="text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider">Avg Daily Calories</span>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-2xl font-bold text-[var(--text)]">
+                  {nutritionChartData.length > 0 
+                    ? Math.round(nutritionChartData.reduce((acc, d) => acc + d.calories, 0) / nutritionChartData.length)
+                    : 0
+                  }
+                </span>
+                <span className="text-[10px] font-bold text-[var(--outline)]">kcal</span>
+              </div>
+            </div>
+            <div className="m3-card p-4 bg-[var(--surface-container)] border border-[var(--outline)]/10">
+              <span className="text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider">Avg Protein</span>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-2xl font-bold text-[var(--text)]">
+                  {nutritionChartData.length > 0 
+                    ? Math.round(nutritionChartData.reduce((acc, d) => acc + d.protein, 0) / nutritionChartData.length)
+                    : 0
+                  }
+                </span>
+                <span className="text-[10px] font-bold text-[var(--outline)]">g</span>
+              </div>
+            </div>
+          </div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="m3-card p-6 border border-[var(--outline)]/10"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold text-[#EA4335] uppercase tracking-wider">Energy</span>
+                <span className="text-xl font-bold text-[var(--text)] tracking-tight">Calorie Intake</span>
+              </div>
+              <div className="bg-[var(--surface-container)] p-2 rounded-xl text-[#EA4335]">
+                <Flame size={18} />
+              </div>
+            </div>
+            
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={nutritionChartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--outline)" strokeOpacity={0.1} vertical={false} />
+                  <XAxis dataKey="date" stroke="var(--outline)" fontSize={10} tickLine={false} axisLine={false} dy={10} />
+                  <YAxis stroke="var(--outline)" fontSize={10} tickLine={false} axisLine={false} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--outline)', borderRadius: '16px' }}
+                    itemStyle={{ color: '#EA4335' }}
+                  />
+                  <Bar dataKey="calories" fill="#EA4335" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="m3-card p-6 border border-[var(--outline)]/10"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold text-[#FBBC05] uppercase tracking-wider">Macros</span>
+                <span className="text-xl font-bold text-[var(--text)] tracking-tight">Nutrient Balance</span>
+              </div>
+              <div className="bg-[var(--surface-container)] p-2 rounded-xl text-[#FBBC05]">
+                <Utensils size={18} />
+              </div>
+            </div>
+            
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={nutritionChartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--outline)" strokeOpacity={0.1} vertical={false} />
+                  <XAxis dataKey="date" stroke="var(--outline)" fontSize={10} tickLine={false} axisLine={false} dy={10} />
+                  <YAxis stroke="var(--outline)" fontSize={10} tickLine={false} axisLine={false} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: 'var(--surface)', border: '1px solid var(--outline)', borderRadius: '16px' }}
+                  />
+                  <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase' }} />
+                  <Line type="monotone" dataKey="protein" stroke="#4285F4" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="carbs" stroke="#FBBC05" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="fats" stroke="#34A853" strokeWidth={2} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {activeTab === 'metrics' && (
         <>
           {/* Metric Selector */}
           <div className="m3-card p-4 border border-[var(--outline)]/10">
