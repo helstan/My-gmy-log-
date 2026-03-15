@@ -64,7 +64,27 @@ export interface PersonalRecord {
   date: string;
 }
 
-export type View = 'home' | 'days' | 'history' | 'prs' | 'active' | 'charts' | 'metrics' | 'cardio' | 'meals';
+export interface CardioWorkout {
+  id: string | number;
+  name: string;
+  accentColor: string;
+  exercises: {
+    name: string;
+    duration?: number; // default duration in seconds
+    distance?: number; // default distance
+    calories?: number; // default calories
+  }[];
+}
+
+export interface DailyGoals {
+  caloriesBurned: number;
+  caloriesConsumed: number;
+  protein: number;
+  carbs: number;
+  fats: number;
+}
+
+export type View = 'home' | 'days' | 'history' | 'prs' | 'active' | 'charts' | 'metrics' | 'cardio' | 'meals' | 'cardio_days';
 
 export interface BodyMetrics {
   id: string;

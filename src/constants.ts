@@ -149,16 +149,25 @@ export const WORKOUT_SPLIT: WorkoutDay[] = [
       },
     ],
   },
+];
+
+export const CARDIO_ROUTINES: any[] = [
   {
-    id: 6,
-    name: 'Cardio & Endurance',
-    accentColor: '#00d2ff', // Sky Blue
-    groups: [
-      {
-        name: 'Cardio',
-        count: 3,
-        pool: ['Running (Treadmill)', 'Cycling', 'Elliptical', 'Rowing Machine', 'Stair Climber', 'Swimming', 'Jump Rope', 'HIIT Session'],
-      },
-    ],
+    id: 'c1',
+    name: 'Morning Run',
+    accentColor: '#34A853',
+    exercises: [{ name: 'Jogging', duration: 1800, distance: 5 }]
   },
+  {
+    id: 'c2',
+    name: 'Swim Session',
+    accentColor: '#4285F4',
+    exercises: [{ name: 'Swimming', duration: 2400, distance: 1.5 }]
+  },
+  {
+    id: 'c3',
+    name: 'HIIT Cardio',
+    accentColor: '#EA4335',
+    exercises: [{ name: 'Jump Rope', duration: 600 }, { name: 'Burpees', duration: 300 }]
+  }
 ];

@@ -1,27 +1,31 @@
 import React, { useState, useMemo } from 'react';
 import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, AreaChart, Area, BarChart, Bar
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, AreaChart, Area, BarChart, Bar, ReferenceLine
 } from 'recharts';
 import { motion, AnimatePresence } from 'motion/react';
-import { TrendingUp, Activity, Target, ChevronRight, BarChart3, Calendar, Utensils, Flame, Clock } from 'lucide-react';
-import { View, WorkoutDay, CompletedWorkout, PersonalRecord, ActiveExercise, BodyMetrics as BodyMetricsType, CardioLog, MealLog } from '../types';
+import { TrendingUp, Activity, Target, ChevronRight, BarChart3, Calendar, Utensils, Flame, Clock, CheckCircle2 } from 'lucide-react';
+import { View, WorkoutDay, CompletedWorkout, PersonalRecord, ActiveExercise, BodyMetrics as BodyMetricsType, CardioLog, MealLog, DailyGoals } from '../types';
 
 interface ProgressChartsProps {
   history: CompletedWorkout[];
   bodyMetrics: BodyMetricsType[];
   cardioLogs: CardioLog[];
   mealLogs: MealLog[];
+  goals: DailyGoals;
 }
 
 export const ProgressCharts: React.FC<ProgressChartsProps> = ({ 
   history, 
   bodyMetrics, 
   cardioLogs, 
-  mealLogs 
+  mealLogs,
+  goals
 }) => {
   const [selectedExercise, setSelectedExercise] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'performance' | 'cardio' | 'nutrition' | 'metrics'>('performance');
   const [selectedMetric, setSelectedMetric] = useState<keyof BodyMetricsType>('weight');
+
+
 
   // Get list of all exercises performed in history
   const availableExercises = useMemo(() => {
@@ -356,12 +360,12 @@ export const ProgressCharts: React.FC<ProgressChartsProps> = ({
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div className="m3-card p-4 bg-[var(--surface-container)] border border-[var(--outline)]/10">
-              <span className="text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider">Total Distance</span>
+              <span className="text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider">Goal Achievement</span>
               <div className="flex items-baseline gap-1 mt-1">
-                <span className="text-2xl font-bold text-[var(--text)]">
-                  {cardioLogs.reduce((acc, l) => acc + (l.distance || 0), 0).toFixed(1)}
+                <span className="text-2xl font-bold text-[#34A853]">
+                  {Math.round((cardioLogs.reduce((acc, l) => acc + (l.calories || 0), 0) / (goals.caloriesBurned * Math.max(cardioChartData.length, 1))) * 100)}%
                 </span>
-                <span className="text-[10px] font-bold text-[var(--outline)]">km</span>
+                <span className="text-[10px] font-bold text-[var(--outline)]">avg</span>
               </div>
             </div>
             <div className="m3-card p-4 bg-[var(--surface-container)] border border-[var(--outline)]/10">
@@ -450,15 +454,12 @@ export const ProgressCharts: React.FC<ProgressChartsProps> = ({
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div className="m3-card p-4 bg-[var(--surface-container)] border border-[var(--outline)]/10">
-              <span className="text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider">Avg Daily Calories</span>
+              <span className="text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider">Goal Achievement</span>
               <div className="flex items-baseline gap-1 mt-1">
-                <span className="text-2xl font-bold text-[var(--text)]">
-                  {nutritionChartData.length > 0 
-                    ? Math.round(nutritionChartData.reduce((acc, d) => acc + d.calories, 0) / nutritionChartData.length)
-                    : 0
-                  }
+                <span className="text-2xl font-bold text-[#EA4335]">
+                  {Math.round((nutritionChartData.reduce((acc, d) => acc + d.calories, 0) / (goals.caloriesConsumed * Math.max(nutritionChartData.length, 1))) * 100)}%
                 </span>
-                <span className="text-[10px] font-bold text-[var(--outline)]">kcal</span>
+                <span className="text-[10px] font-bold text-[var(--outline)]">avg</span>
               </div>
             </div>
             <div className="m3-card p-4 bg-[var(--surface-container)] border border-[var(--outline)]/10">

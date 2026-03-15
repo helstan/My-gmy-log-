@@ -5,9 +5,19 @@ import {
   ActiveExercise, 
   BodyMetrics, 
   MealLog, 
-  CardioLog 
+  CardioLog,
+  DailyGoals,
+  CardioWorkout
 } from './types';
 import { WORKOUT_SPLIT } from './constants';
+
+export const DEFAULT_GOALS: DailyGoals = {
+  caloriesBurned: 100,
+  caloriesConsumed: 2000,
+  protein: 150,
+  carbs: 250,
+  fats: 70
+};
 
 export const generateDemoData = () => {
   const history: CompletedWorkout[] = [];
@@ -94,6 +104,8 @@ export interface StorageData {
   cardioLogs: CardioLog[];
   activeWorkout?: WorkoutDay | null;
   activeExercises?: ActiveExercise[];
+  dailyGoals: DailyGoals;
+  customCardioWorkouts: CardioWorkout[];
 }
 
 export const getStorageData = (): StorageData => {
@@ -107,6 +119,8 @@ export const getStorageData = (): StorageData => {
   const cardioLogs = localStorage.getItem('gym_cardio_logs');
   const activeWorkout = localStorage.getItem('gym_active_workout');
   const activeExercises = localStorage.getItem('gym_active_exercises');
+  const dailyGoals = localStorage.getItem('gym_daily_goals');
+  const customCardioWorkouts = localStorage.getItem('gym_custom_cardio_workouts');
 
   // Only generate demo data if history is completely empty/missing
   if (!history) {
@@ -119,13 +133,15 @@ export const getStorageData = (): StorageData => {
       mealLogs: [],
       cardioLogs: [],
       activeWorkout: null,
-      activeExercises: []
+      activeExercises: [],
+      dailyGoals: DEFAULT_GOALS,
+      customCardioWorkouts: []
     };
     saveStorageData(
       initialData.history, 
       initialData.prs, 
       initialData.gymDays, 
-      [], [], [], [], [], null, []
+      [], [], [], [], [], null, [], DEFAULT_GOALS, []
     );
     return initialData;
   }
@@ -140,7 +156,9 @@ export const getStorageData = (): StorageData => {
     mealLogs: mealLogs ? JSON.parse(mealLogs) : [],
     cardioLogs: cardioLogs ? JSON.parse(cardioLogs) : [],
     activeWorkout: activeWorkout ? JSON.parse(activeWorkout) : null,
-    activeExercises: activeExercises ? JSON.parse(activeExercises) : []
+    activeExercises: activeExercises ? JSON.parse(activeExercises) : [],
+    dailyGoals: dailyGoals ? JSON.parse(dailyGoals) : DEFAULT_GOALS,
+    customCardioWorkouts: customCardioWorkouts ? JSON.parse(customCardioWorkouts) : []
   };
 };
 
@@ -154,7 +172,9 @@ export const saveStorageData = (
   mealLogs: any[] = [],
   cardioLogs: any[] = [],
   activeWorkout: any = null,
-  activeExercises: any[] = []
+  activeExercises: any[] = [],
+  dailyGoals: DailyGoals = DEFAULT_GOALS,
+  customCardioWorkouts: CardioWorkout[] = []
 ) => {
   localStorage.setItem('gym_history', JSON.stringify(history));
   localStorage.setItem('gym_prs', JSON.stringify(prs));
@@ -166,4 +186,6 @@ export const saveStorageData = (
   localStorage.setItem('gym_cardio_logs', JSON.stringify(cardioLogs));
   localStorage.setItem('gym_active_workout', JSON.stringify(activeWorkout));
   localStorage.setItem('gym_active_exercises', JSON.stringify(activeExercises));
+  localStorage.setItem('gym_daily_goals', JSON.stringify(dailyGoals));
+  localStorage.setItem('gym_custom_cardio_workouts', JSON.stringify(customCardioWorkouts));
 };

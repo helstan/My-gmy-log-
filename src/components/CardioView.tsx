@@ -1,16 +1,50 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Activity, Plus, History, Calendar as CalendarIcon, Clock, Zap, MapPin, Trash2, ChevronRight } from 'lucide-react';
-import { CardioLog } from '../types';
+import { Activity, Plus, History, Calendar as CalendarIcon, Clock, Zap, MapPin, Trash2, Play } from 'lucide-react';
+import { CardioLog, CardioWorkout } from '../types';
 import { Calendar } from './Calendar';
 
 interface CardioViewProps {
   logs: CardioLog[];
+  routines: CardioWorkout[];
+  customRoutines: CardioWorkout[];
   onSave: (log: CardioLog) => void;
   onDelete: (id: string) => void;
+  onStartRoutine: (routine: CardioWorkout) => void;
 }
 
-export const CardioView: React.FC<CardioViewProps> = ({ logs, onSave, onDelete }) => {
+const CardioRoutineCard = ({ routine, onStart }: { routine: CardioWorkout, onStart: (r: CardioWorkout) => void, key?: React.Key }) => (
+  <motion.div 
+    whileHover={{ y: -4 }}
+    whileTap={{ scale: 0.98 }}
+    onClick={() => onStart(routine)}
+    className="m3-card p-5 border border-[var(--outline)]/10 cursor-pointer group relative overflow-hidden"
+  >
+    <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--primary)]/5 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:bg-[var(--primary)]/10" />
+    
+    <div className="flex items-center justify-between relative z-10">
+      <div className="flex items-center gap-4">
+        <div 
+          className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg"
+          style={{ backgroundColor: routine.accentColor }}
+        >
+          <Activity size={24} />
+        </div>
+        <div>
+          <h3 className="text-lg font-bold text-[var(--text)]">{routine.name}</h3>
+          <p className="text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider">
+            {routine.exercises.length} Exercises • {Math.round(routine.exercises.reduce((acc, ex) => acc + (ex.duration || 0), 0) / 60)} min
+          </p>
+        </div>
+      </div>
+      <div className="w-10 h-10 rounded-full bg-[var(--surface-container)] flex items-center justify-center text-[var(--outline)] group-hover:bg-[var(--primary)] group-hover:text-white transition-all">
+        <Play size={18} fill="currentColor" />
+      </div>
+    </div>
+  </motion.div>
+);
+
+export const CardioView: React.FC<CardioViewProps> = ({ logs, routines, customRoutines, onSave, onDelete, onStartRoutine }) => {
   const [showAdd, setShowAdd] = useState(false);
   const [exerciseName, setExerciseName] = useState('');
   const [duration, setDuration] = useState(''); // minutes
@@ -45,14 +79,6 @@ export const CardioView: React.FC<CardioViewProps> = ({ logs, onSave, onDelete }
 
   const cardioDays = logs.map(l => l.date.split('T')[0]);
 
-  const cardioTypes = [
-    { name: 'Swimming', icon: '🏊' },
-    { name: 'Jogging', icon: '🏃' },
-    { name: 'Zumba', icon: '💃' },
-    { name: 'Pilates', icon: '🧘' },
-    { name: 'Cycling', icon: '🚴' }
-  ];
-
   return (
     <div className="space-y-8">
       <header className="flex items-center justify-between">
@@ -71,7 +97,28 @@ export const CardioView: React.FC<CardioViewProps> = ({ logs, onSave, onDelete }
         </button>
       </header>
 
-      <Calendar gymDays={cardioDays} onToggleDay={() => {}} history={[]} />
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 px-1">
+          <CalendarIcon size={16} className="text-[var(--outline)]" />
+          <h3 className="text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider">Activity Calendar</h3>
+        </div>
+        <Calendar gymDays={cardioDays} onToggleDay={() => {}} history={[]} />
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 px-1">
+          <Zap size={16} className="text-[var(--outline)]" />
+          <h3 className="text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider">Saved Routines</h3>
+        </div>
+        <div className="grid gap-4">
+          {routines.map(routine => (
+            <CardioRoutineCard key={routine.id} routine={routine} onStart={onStartRoutine} />
+          ))}
+          {customRoutines.map(routine => (
+            <CardioRoutineCard key={routine.id} routine={routine} onStart={onStartRoutine} />
+          ))}
+        </div>
+      </div>
 
       <AnimatePresence>
         {showAdd && (
@@ -82,26 +129,7 @@ export const CardioView: React.FC<CardioViewProps> = ({ logs, onSave, onDelete }
             className="overflow-hidden"
           >
             <div className="m3-card p-6 border border-[var(--outline)]/10 space-y-6">
-              <div className="space-y-3">
-                <label className="text-[10px] font-bold text-[var(--outline)] uppercase px-1">Quick Select</label>
-                <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-                  {cardioTypes.map(type => (
-                    <button
-                      key={type.name}
-                      onClick={() => setExerciseName(type.name)}
-                      className={`flex-shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
-                        exerciseName === type.name 
-                          ? 'bg-[#34A853] text-white border-[#34A853]' 
-                          : 'bg-[var(--surface-container)] text-[var(--text)] border-[var(--outline)]/10'
-                      }`}
-                    >
-                      <span className="mr-2">{type.icon}</span>
-                      {type.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
+              <h3 className="text-sm font-bold text-[var(--text)] uppercase tracking-wider">Quick Log</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2 space-y-1">
                   <label className="text-[10px] font-bold text-[var(--outline)] uppercase px-1">Activity Name</label>
