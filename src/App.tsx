@@ -12,10 +12,14 @@ import {
   Settings, 
   Flame, 
   Zap,
-  BarChart3
+  BarChart3,
+  Scale,
+  Activity,
+  Utensils,
+  Home
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { View, WorkoutDay, CompletedWorkout, PersonalRecord, ActiveExercise } from './types';
+import { View, WorkoutDay, CompletedWorkout, PersonalRecord, ActiveExercise, BodyMetrics as BodyMetricsType, MealLog, CardioLog } from './types';
 import { WORKOUT_SPLIT } from './constants';
 import { getStorageData, saveStorageData } from './utils';
 import { Calendar } from './components/Calendar';
@@ -24,15 +28,22 @@ import { ActiveWorkout } from './components/ActiveWorkout';
 import { HistoryView } from './components/HistoryView';
 import { PRView } from './components/PRView';
 import { ProgressCharts } from './components/ProgressCharts';
+import { BodyMetrics } from './components/BodyMetrics';
 import { CreateWorkoutModal } from './components/CreateWorkoutModal';
+import { HomeView } from './components/HomeView';
+import { CardioView } from './components/CardioView';
+import { MealTracker } from './components/MealTracker';
 
 export default function App() {
-  const [view, setView] = useState<View>('days');
+  const [view, setView] = useState<View>('home');
   const [history, setHistory] = useState<CompletedWorkout[]>([]);
   const [prs, setPrs] = useState<PersonalRecord[]>([]);
   const [gymDays, setGymDays] = useState<string[]>([]);
   const [customWorkouts, setCustomWorkouts] = useState<WorkoutDay[]>([]);
   const [customExercises, setCustomExercises] = useState<string[]>([]);
+  const [bodyMetrics, setBodyMetrics] = useState<BodyMetricsType[]>([]);
+  const [mealLogs, setMealLogs] = useState<MealLog[]>([]);
+  const [cardioLogs, setCardioLogs] = useState<CardioLog[]>([]);
   const [activeWorkout, setActiveWorkout] = useState<WorkoutDay | null>(null);
   const [showCreateWorkout, setShowCreateWorkout] = useState(false);
   const [newExerciseName, setNewExerciseName] = useState('');
@@ -52,6 +63,9 @@ export default function App() {
     setGymDays(data.gymDays);
     setCustomWorkouts(data.customWorkouts);
     setCustomExercises(data.customExercises);
+    setBodyMetrics(data.bodyMetrics || []);
+    setMealLogs(data.mealLogs || []);
+    setCardioLogs(data.cardioLogs || []);
     
     // Calculate XP and Level based on history
     const totalXp = data.history.length * 100;
@@ -80,7 +94,7 @@ export default function App() {
       ? gymDays.filter(d => d !== date)
       : [...gymDays, date];
     setGymDays(newGymDays);
-    saveStorageData(history, prs, newGymDays, customWorkouts, customExercises);
+    saveStorageData(history, prs, newGymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, cardioLogs);
   };
 
   const handleStartWorkout = (workout: WorkoutDay) => {
@@ -125,7 +139,7 @@ export default function App() {
     setHistory(newHistory);
     setPrs(newPrs);
     setGymDays(newGymDays);
-    saveStorageData(newHistory, newPrs, newGymDays, customWorkouts, customExercises);
+    saveStorageData(newHistory, newPrs, newGymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, cardioLogs);
     setActiveWorkout(null);
     setView('history');
   };
@@ -133,15 +147,51 @@ export default function App() {
   const handleAddCustomWorkout = (workout: WorkoutDay) => {
     const newCustom = [...customWorkouts, workout];
     setCustomWorkouts(newCustom);
-    saveStorageData(history, prs, gymDays, newCustom, customExercises);
+    saveStorageData(history, prs, gymDays, newCustom, customExercises, bodyMetrics, mealLogs, cardioLogs);
   };
 
   const handleAddCustomExercise = () => {
     if (!newExerciseName) return;
     const newCustom = [...customExercises, newExerciseName];
     setCustomExercises(newCustom);
-    saveStorageData(history, prs, gymDays, customWorkouts, newCustom);
+    saveStorageData(history, prs, gymDays, customWorkouts, newCustom, bodyMetrics, mealLogs, cardioLogs);
     setNewExerciseName('');
+  };
+
+  const handleSaveMetrics = (m: BodyMetricsType) => {
+    const newMetrics = [m, ...bodyMetrics];
+    setBodyMetrics(newMetrics);
+    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, newMetrics, mealLogs, cardioLogs);
+  };
+
+  const handleDeleteMetrics = (id: string) => {
+    const newMetrics = bodyMetrics.filter(m => m.id !== id);
+    setBodyMetrics(newMetrics);
+    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, newMetrics, mealLogs, cardioLogs);
+  };
+
+  const handleSaveMeal = (log: MealLog) => {
+    const newLogs = [log, ...mealLogs];
+    setMealLogs(newLogs);
+    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, newLogs, cardioLogs);
+  };
+
+  const handleDeleteMeal = (id: string) => {
+    const newLogs = mealLogs.filter(l => l.id !== id);
+    setMealLogs(newLogs);
+    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, newLogs, cardioLogs);
+  };
+
+  const handleSaveCardio = (log: CardioLog) => {
+    const newLogs = [log, ...cardioLogs];
+    setCardioLogs(newLogs);
+    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, newLogs);
+  };
+
+  const handleDeleteCardio = (id: string) => {
+    const newLogs = cardioLogs.filter(l => l.id !== id);
+    setCardioLogs(newLogs);
+    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, newLogs);
   };
 
   const allAvailableExercises = useMemo(() => {
@@ -219,6 +269,17 @@ export default function App() {
       {/* Main Content */}
       <main className="flex-1 max-w-[520px] w-full mx-auto p-5 pb-32">
         <AnimatePresence mode="wait">
+          {view === 'home' && (
+            <motion.div
+              key="home"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <HomeView onSelectOption={setView} userName="Helstan" />
+            </motion.div>
+          )}
+
           {view === 'days' && (
             <motion.div
               key="days"
@@ -303,6 +364,21 @@ export default function App() {
             </motion.div>
           )}
 
+          {view === 'metrics' && (
+            <motion.div
+              key="metrics"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <BodyMetrics 
+                metrics={bodyMetrics} 
+                onSave={handleSaveMetrics} 
+                onDelete={handleDeleteMetrics} 
+              />
+            </motion.div>
+          )}
+
           {view === 'charts' && (
             <motion.div
               key="charts"
@@ -310,7 +386,29 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
             >
-              <ProgressCharts history={history} />
+              <ProgressCharts history={history} bodyMetrics={bodyMetrics} />
+            </motion.div>
+          )}
+
+          {view === 'cardio' && (
+            <motion.div
+              key="cardio"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <CardioView logs={cardioLogs} onSave={handleSaveCardio} onDelete={handleDeleteCardio} />
+            </motion.div>
+          )}
+
+          {view === 'meals' && (
+            <motion.div
+              key="meals"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <MealTracker logs={mealLogs} onSave={handleSaveMeal} onDelete={handleDeleteMeal} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -335,10 +433,11 @@ export default function App() {
       {/* Bottom Navigation */}
       {view !== 'active' && (
         <nav className="fixed bottom-0 left-0 right-0 z-20 bg-[var(--surface)]/90 backdrop-blur-xl border-t border-[var(--outline)]/10 px-6 py-3 pb-8 flex items-center justify-between">
-          <NavItem id="days" icon={CalendarIcon} label="Days" />
-          <NavItem id="history" icon={History} label="History" />
-          <NavItem id="prs" icon={Trophy} label="PRs" />
-          <NavItem id="charts" icon={TrendingUp} label="Progress" />
+          <NavItem id="home" icon={Home} label="Home" />
+          <NavItem id="days" icon={CalendarIcon} label="Workout" />
+          <NavItem id="cardio" icon={Activity} label="Cardio" />
+          <NavItem id="meals" icon={Utensils} label="Meals" />
+          <NavItem id="charts" icon={TrendingUp} label="Stats" />
         </nav>
       )}
 

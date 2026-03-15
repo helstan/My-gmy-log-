@@ -4,8 +4,14 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   
+  /* Google Brand Colors */
+  --color-google-blue: #4285F4;
+  --color-google-red: #EA4335;
+  --color-google-yellow: #FBBC05;
+  --color-google-green: #34A853;
+
   /* Material 3 Light Palette */
-  --color-md-primary: #0061A4;
+  --color-md-primary: #4285F4;
   --color-md-on-primary: #FFFFFF;
   --color-md-primary-container: #D1E4FF;
   --color-md-on-primary-container: #001D36;
@@ -15,48 +21,56 @@
   --color-md-secondary-container: #D7E3F7;
   --color-md-on-secondary-container: #101C2B;
   
-  --color-md-tertiary: #6B5778;
+  --color-md-tertiary: #34A853;
   --color-md-on-tertiary: #FFFFFF;
-  --color-md-tertiary-container: #F2DAFF;
-  --color-md-on-tertiary-container: #251431;
+  --color-md-tertiary-container: #C4EED0;
+  --color-md-on-tertiary-container: #072711;
   
-  --color-md-surface: #FDFCFF;
-  --color-md-on-surface: #1A1C1E;
-  --color-md-surface-variant: #DFE2EB;
-  --color-md-on-surface-variant: #43474E;
-  --color-md-outline: #73777F;
+  --color-md-surface: #F8F9FA;
+  --color-md-on-surface: #202124;
+  --color-md-surface-variant: #E8EAED;
+  --color-md-on-surface-variant: #5F6368;
+  --color-md-outline: #DADCE0;
   
   /* Gym Specific Accents (Google Style) */
-  --color-focus: #0061A4;
-  --color-energy: #B93000;
-  --color-success: #006E1C;
-  --color-passion: #BA1A1A;
+  --color-focus: #4285F4;
+  --color-energy: #EA4335;
+  --color-success: #34A853;
+  --color-warning: #FBBC05;
   --color-power: #6B5778;
 }
 
 @layer base {
   :root {
-    --bg: #FDFCFF;
-    --text: #1A1C1E;
-    --surface: #FDFCFF;
-    --surface-container: #F3F4F9;
-    --primary: #0061A4;
+    --bg: #F8F9FA;
+    --text: #202124;
+    --surface: #FFFFFF;
+    --surface-container: #F1F3F4;
+    --primary: #4285F4;
     --on-primary: #FFFFFF;
-    --secondary-container: #D7E3F7;
-    --on-secondary-container: #101C2B;
-    --outline: #73777F;
+    --secondary-container: #E8F0FE;
+    --on-secondary-container: #1967D2;
+    --outline: #DADCE0;
+    --success: #34A853;
+    --energy: #EA4335;
+    --passion: #EA4335;
+    --power: #6B5778;
   }
 
   .dark {
-    --bg: #1A1C1E;
-    --text: #E2E2E6;
-    --surface: #1A1C1E;
-    --surface-container: #2F3033;
-    --primary: #9ECAFF;
-    --on-primary: #003258;
-    --secondary-container: #3B4858;
-    --on-secondary-container: #D7E3F7;
-    --outline: #8D9199;
+    --bg: #202124;
+    --text: #E8EAED;
+    --surface: #292A2D;
+    --surface-container: #3C4043;
+    --primary: #8AB4F8;
+    --on-primary: #202124;
+    --secondary-container: #3C4043;
+    --on-secondary-container: #D2E3FC;
+    --outline: #5F6368;
+    --success: #81C995;
+    --energy: #F28B82;
+    --passion: #F28B82;
+    --power: #D7AEFB;
   }
 
   body {

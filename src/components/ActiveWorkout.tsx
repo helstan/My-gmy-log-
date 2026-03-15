@@ -26,16 +26,22 @@ export const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({ workout, onClose, 
   const [exercises, setExercises] = useState<ActiveExercise[]>(() => {
     return workout.groups.flatMap(group => {
       const shuffled = [...group.pool].sort(() => 0.5 - Math.random());
-      return shuffled.slice(0, group.count).map(name => ({
-        id: Math.random().toString(36).substr(2, 9),
-        name,
-        muscleGroup: group.name,
-        isLbs: false,
-        sets: [{ id: Math.random().toString(36).substr(2, 9), weight: 0, reps: 0, rpe: 0, isLbs: false }],
-        targetTime: 120, // 2 minutes default
-        actualTime: 0,
-        isCompleted: false
-      }));
+      return shuffled.slice(0, group.count).map(name => {
+        const isCardio = group.name === 'Cardio';
+        return {
+          id: Math.random().toString(36).substr(2, 9),
+          name,
+          muscleGroup: group.name as any,
+          isLbs: false,
+          sets: [isCardio 
+            ? { id: Math.random().toString(36).substr(2, 9), duration: 0, distance: 0, intensity: 5 }
+            : { id: Math.random().toString(36).substr(2, 9), weight: 0, reps: 0, rpe: 0, isLbs: false }
+          ],
+          targetTime: 120,
+          actualTime: 0,
+          isCompleted: false
+        };
+      });
     });
   });
 
@@ -101,15 +107,24 @@ export const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({ workout, onClose, 
     setExercises(prev => prev.map(ex => {
       if (ex.id === exerciseId) {
         const lastSet = ex.sets[ex.sets.length - 1];
+        const isCardio = ex.muscleGroup === 'Cardio';
         return {
           ...ex,
-          sets: [...ex.sets, { 
-            id: Math.random().toString(36).substr(2, 9), 
-            weight: lastSet.weight, 
-            reps: lastSet.reps, 
-            rpe: lastSet.rpe, 
-            isLbs: ex.isLbs 
-          }]
+          sets: [...ex.sets, isCardio 
+            ? { 
+                id: Math.random().toString(36).substr(2, 9), 
+                duration: lastSet.duration, 
+                distance: lastSet.distance, 
+                intensity: lastSet.intensity 
+              }
+            : { 
+                id: Math.random().toString(36).substr(2, 9), 
+                weight: lastSet.weight, 
+                reps: lastSet.reps, 
+                rpe: lastSet.rpe, 
+                isLbs: ex.isLbs 
+              }
+          ]
         };
       }
       return ex;
@@ -159,12 +174,16 @@ export const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({ workout, onClose, 
   };
 
   const addNewExercise = (name: string, muscleGroup: any) => {
+    const isCardio = muscleGroup === 'Cardio';
     const newEx: ActiveExercise = {
       id: Math.random().toString(36).substr(2, 9),
       name,
       muscleGroup,
       isLbs: false,
-      sets: [{ id: Math.random().toString(36).substr(2, 9), weight: 0, reps: 0, rpe: 0, isLbs: false }],
+      sets: [isCardio 
+        ? { id: Math.random().toString(36).substr(2, 9), duration: 0, distance: 0, intensity: 5 }
+        : { id: Math.random().toString(36).substr(2, 9), weight: 0, reps: 0, rpe: 0, isLbs: false }
+      ],
       targetTime: 120,
       actualTime: 0,
       isCompleted: false
@@ -439,63 +458,123 @@ export const ActiveWorkout: React.FC<ActiveWorkoutProps> = ({ workout, onClose, 
                   </div>
 
                   <div className="space-y-4">
-                    <div className="grid grid-cols-5 gap-2 text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider px-2">
-                      <div className="col-span-1">Set</div>
-                      <div className="col-span-1">Weight</div>
-                      <div className="col-span-1">Reps</div>
-                      <div className="col-span-1">RPE</div>
-                      <div className="col-span-1 text-right">Vol</div>
-                    </div>
-                    
-                    {ex.sets.map((set, setIdx) => {
-                      const volume = set.weight * set.reps;
-                      const hasPR = isPR(ex, set);
-                      return (
-                        <div key={set.id} className="grid grid-cols-5 gap-2 items-center px-1">
-                          <div className="text-sm font-bold text-[var(--outline)]">{setIdx + 1}</div>
-                          <div>
-                            <input 
-                              type="number" 
-                              inputMode="decimal"
-                              value={set.weight || ''} 
-                              onChange={e => updateSet(ex.id, set.id, 'weight', parseFloat(e.target.value) || 0)}
-                              className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-2 py-2.5 text-sm font-bold text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
-                              disabled={ex.isCompleted}
-                            />
-                          </div>
-                          <div>
-                            <input 
-                              type="number" 
-                              inputMode="numeric"
-                              value={set.reps || ''} 
-                              onChange={e => updateSet(ex.id, set.id, 'reps', parseInt(e.target.value) || 0)}
-                              className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-2 py-2.5 text-sm font-bold text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
-                              disabled={ex.isCompleted}
-                            />
-                          </div>
-                          <div>
-                            <input 
-                              type="number" 
-                              inputMode="decimal"
-                              value={set.rpe || ''} 
-                              onChange={e => updateSet(ex.id, set.id, 'rpe', parseFloat(e.target.value) || 0)}
-                              className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-2 py-2.5 text-sm font-bold text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
-                              disabled={ex.isCompleted}
-                            />
-                          </div>
-                          <div className="text-right">
-                            <div className="flex flex-col items-end">
-                              <span className="text-sm font-bold text-[var(--text)]">{volume}</span>
-                              {hasPR && (
-                                <span className="flex items-center gap-0.5 text-[8px] font-bold text-[var(--energy)] uppercase">
-                                  <Trophy size={8} /> PR
-                                </span>
-                              )}
+                    {ex.muscleGroup === 'Cardio' ? (
+                      <>
+                        <div className="grid grid-cols-5 gap-2 text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider px-2">
+                          <div className="col-span-1">Set</div>
+                          <div className="col-span-1">Min</div>
+                          <div className="col-span-1">Km</div>
+                          <div className="col-span-1">Int</div>
+                          <div className="col-span-1 text-right">Cal</div>
+                        </div>
+                        
+                        {ex.sets.map((set, setIdx) => (
+                          <div key={set.id} className="grid grid-cols-5 gap-2 items-center px-1">
+                            <div className="text-sm font-bold text-[var(--outline)]">{setIdx + 1}</div>
+                            <div>
+                              <input 
+                                type="number" 
+                                inputMode="decimal"
+                                value={set.duration ? (set.duration / 60).toFixed(1) : ''} 
+                                onChange={e => updateSet(ex.id, set.id, 'duration', (parseFloat(e.target.value) || 0) * 60)}
+                                className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-2 py-2.5 text-sm font-bold text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
+                                disabled={ex.isCompleted}
+                              />
+                            </div>
+                            <div>
+                              <input 
+                                type="number" 
+                                inputMode="decimal"
+                                value={set.distance || ''} 
+                                onChange={e => updateSet(ex.id, set.id, 'distance', parseFloat(e.target.value) || 0)}
+                                className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-2 py-2.5 text-sm font-bold text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
+                                disabled={ex.isCompleted}
+                              />
+                            </div>
+                            <div>
+                              <input 
+                                type="number" 
+                                inputMode="numeric"
+                                value={set.intensity || ''} 
+                                onChange={e => updateSet(ex.id, set.id, 'intensity', parseInt(e.target.value) || 0)}
+                                className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-2 py-2.5 text-sm font-bold text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
+                                disabled={ex.isCompleted}
+                              />
+                            </div>
+                            <div className="text-right">
+                              <input 
+                                type="number" 
+                                inputMode="numeric"
+                                value={set.calories || ''} 
+                                onChange={e => updateSet(ex.id, set.id, 'calories', parseInt(e.target.value) || 0)}
+                                className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-2 py-2.5 text-sm font-bold text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 text-right"
+                                disabled={ex.isCompleted}
+                              />
                             </div>
                           </div>
+                        ))}
+                      </>
+                    ) : (
+                      <>
+                        <div className="grid grid-cols-5 gap-2 text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider px-2">
+                          <div className="col-span-1">Set</div>
+                          <div className="col-span-1">Weight</div>
+                          <div className="col-span-1">Reps</div>
+                          <div className="col-span-1">RPE</div>
+                          <div className="col-span-1 text-right">Vol</div>
                         </div>
-                      );
-                    })}
+                        
+                        {ex.sets.map((set, setIdx) => {
+                          const volume = (set.weight || 0) * (set.reps || 0);
+                          const hasPR = isPR(ex, set);
+                          return (
+                            <div key={set.id} className="grid grid-cols-5 gap-2 items-center px-1">
+                              <div className="text-sm font-bold text-[var(--outline)]">{setIdx + 1}</div>
+                              <div>
+                                <input 
+                                  type="number" 
+                                  inputMode="decimal"
+                                  value={set.weight || ''} 
+                                  onChange={e => updateSet(ex.id, set.id, 'weight', parseFloat(e.target.value) || 0)}
+                                  className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-2 py-2.5 text-sm font-bold text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
+                                  disabled={ex.isCompleted}
+                                />
+                              </div>
+                              <div>
+                                <input 
+                                  type="number" 
+                                  inputMode="numeric"
+                                  value={set.reps || ''} 
+                                  onChange={e => updateSet(ex.id, set.id, 'reps', parseInt(e.target.value) || 0)}
+                                  className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-2 py-2.5 text-sm font-bold text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
+                                  disabled={ex.isCompleted}
+                                />
+                              </div>
+                              <div>
+                                <input 
+                                  type="number" 
+                                  inputMode="decimal"
+                                  value={set.rpe || ''} 
+                                  onChange={e => updateSet(ex.id, set.id, 'rpe', parseFloat(e.target.value) || 0)}
+                                  className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-2 py-2.5 text-sm font-bold text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
+                                  disabled={ex.isCompleted}
+                                />
+                              </div>
+                              <div className="text-right">
+                                <div className="flex flex-col items-end">
+                                  <span className="text-sm font-bold text-[var(--text)]">{volume}</span>
+                                  {hasPR && (
+                                    <span className="flex items-center gap-0.5 text-[8px] font-bold text-[var(--energy)] uppercase">
+                                      <Trophy size={8} /> PR
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </>
+                    )}
                   </div>
 
                   {!ex.isCompleted && (

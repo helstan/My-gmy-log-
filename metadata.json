@@ -1,5 +1,5 @@
 {
   "name": "Helstan's Gym Log",
-  "description": "A dark-themed, mobile-friendly personal gym tracker with workout splits, history, and PR tracking.",
+  "description": "A Google-inspired, mobile-friendly gym tracker with light/dark mode, workout splits, cardio support, and body metrics tracking.",
   "requestFramePermissions": []
 }

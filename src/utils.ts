@@ -81,19 +81,28 @@ export const getStorageData = (): StorageData => {
   const gymDays = localStorage.getItem('gym_days');
   const customWorkouts = localStorage.getItem('gym_custom_workouts');
   const customExercises = localStorage.getItem('gym_custom_exercises');
+  const bodyMetrics = localStorage.getItem('gym_body_metrics');
+  const mealLogs = localStorage.getItem('gym_meal_logs');
+  const cardioLogs = localStorage.getItem('gym_cardio_logs');
 
   if (!history || !prs || !gymDays) {
     const demo = generateDemoData();
     const initialData: StorageData = {
       ...demo,
       customWorkouts: [],
-      customExercises: []
+      customExercises: [],
+      bodyMetrics: [],
+      mealLogs: [],
+      cardioLogs: []
     };
     localStorage.setItem('gym_history', JSON.stringify(initialData.history));
     localStorage.setItem('gym_prs', JSON.stringify(initialData.prs));
     localStorage.setItem('gym_days', JSON.stringify(initialData.gymDays));
     localStorage.setItem('gym_custom_workouts', JSON.stringify(initialData.customWorkouts));
     localStorage.setItem('gym_custom_exercises', JSON.stringify(initialData.customExercises));
+    localStorage.setItem('gym_body_metrics', JSON.stringify(initialData.bodyMetrics));
+    localStorage.setItem('gym_meal_logs', JSON.stringify(initialData.mealLogs));
+    localStorage.setItem('gym_cardio_logs', JSON.stringify(initialData.cardioLogs));
     return initialData;
   }
 
@@ -102,20 +111,29 @@ export const getStorageData = (): StorageData => {
     prs: JSON.parse(prs) as PersonalRecord[],
     gymDays: JSON.parse(gymDays) as string[],
     customWorkouts: customWorkouts ? JSON.parse(customWorkouts) : [],
-    customExercises: customExercises ? JSON.parse(customExercises) : []
+    customExercises: customExercises ? JSON.parse(customExercises) : [],
+    bodyMetrics: bodyMetrics ? JSON.parse(bodyMetrics) : [],
+    mealLogs: mealLogs ? JSON.parse(mealLogs) : [],
+    cardioLogs: cardioLogs ? JSON.parse(cardioLogs) : []
   };
 };
 
 export const saveStorageData = (
-  history: CompletedWorkout[], 
-  prs: PersonalRecord[], 
+  history: any[], 
+  prs: any[], 
   gymDays: string[],
   customWorkouts: any[] = [],
-  customExercises: string[] = []
+  customExercises: string[] = [],
+  bodyMetrics: any[] = [],
+  mealLogs: any[] = [],
+  cardioLogs: any[] = []
 ) => {
   localStorage.setItem('gym_history', JSON.stringify(history));
   localStorage.setItem('gym_prs', JSON.stringify(prs));
   localStorage.setItem('gym_days', JSON.stringify(gymDays));
   localStorage.setItem('gym_custom_workouts', JSON.stringify(customWorkouts));
   localStorage.setItem('gym_custom_exercises', JSON.stringify(customExercises));
+  localStorage.setItem('gym_body_metrics', JSON.stringify(bodyMetrics));
+  localStorage.setItem('gym_meal_logs', JSON.stringify(mealLogs));
+  localStorage.setItem('gym_cardio_logs', JSON.stringify(cardioLogs));
 };

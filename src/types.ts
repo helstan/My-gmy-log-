@@ -2,10 +2,13 @@ import { LucideIcon } from 'lucide-react';
 
 export type MuscleGroup = 'Lats/Width' | 'Thickness' | 'Upper Back' | 'Forearms' | 'Chest' | 'Shoulders' | 'Triceps' | 'Quads' | 'Hamstrings' | 'Calves' | 'Abs' | 'Calisthenics' | 'Biceps';
 
+export type ExerciseType = 'strength' | 'cardio';
+
 export interface Exercise {
   id: string;
   name: string;
-  muscleGroup: MuscleGroup;
+  muscleGroup: MuscleGroup | 'Cardio';
+  type: ExerciseType;
 }
 
 export interface WorkoutDay {
@@ -21,10 +24,15 @@ export interface WorkoutDay {
 
 export interface SetEntry {
   id: string;
-  weight: number;
-  reps: number;
-  rpe: number;
-  isLbs: boolean;
+  weight?: number;
+  reps?: number;
+  rpe?: number;
+  isLbs?: boolean;
+  // Cardio fields
+  duration?: number; // in seconds
+  distance?: number; // in km or miles
+  intensity?: number; // 1-10 scale or heart rate
+  calories?: number;
 }
 
 export interface ActiveExercise {
@@ -56,7 +64,39 @@ export interface PersonalRecord {
   date: string;
 }
 
-export type View = 'days' | 'history' | 'prs' | 'active' | 'charts';
+export type View = 'home' | 'days' | 'history' | 'prs' | 'active' | 'charts' | 'metrics' | 'cardio' | 'meals';
+
+export interface BodyMetrics {
+  id: string;
+  date: string;
+  weight: number; // in kg
+  height: number; // in cm
+  waist: number; // in cm
+  hip: number; // in cm
+  bmi: number;
+  waistToHip: number;
+}
+
+export interface MealLog {
+  id: string;
+  date: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fats: number;
+  name: string;
+}
+
+export interface CardioLog {
+  id: string;
+  date: string;
+  exerciseName: string;
+  distance?: number;
+  speed?: number;
+  duration: number; // in seconds
+  calories?: number;
+  notes?: string;
+}
 
 export interface StorageData {
   history: CompletedWorkout[];
@@ -64,4 +104,7 @@ export interface StorageData {
   gymDays: string[];
   customWorkouts: WorkoutDay[];
   customExercises: string[];
+  bodyMetrics: BodyMetrics[];
+  mealLogs: MealLog[];
+  cardioLogs: CardioLog[];
 }

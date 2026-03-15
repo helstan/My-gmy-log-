@@ -1,5 +1,18 @@
 import { WorkoutDay } from './types';
 
+export const MOTIVATIONAL_QUOTES = [
+  "The only bad workout is the one that didn't happen.",
+  "Action is the foundational key to all success.",
+  "Your body can stand almost anything. It’s your mind that you have to convince.",
+  "Fitness is not about being better than someone else. It’s about being better than you were yesterday.",
+  "Success starts with self-discipline.",
+  "Don’t stop when you’re tired. Stop when you’re done.",
+  "Motivation is what gets you started. Habit is what keeps you going.",
+  "The hard part isn’t getting your body in shape. The hard part is getting your mind in shape.",
+  "A one-hour workout is only 4% of your day. No excuses.",
+  "The difference between the impossible and the possible lies in a person’s determination."
+];
+
 export const WORKOUT_SPLIT: WorkoutDay[] = [
   {
     id: 1,
@@ -133,6 +146,18 @@ export const WORKOUT_SPLIT: WorkoutDay[] = [
         name: 'Abs',
         count: 3,
         pool: ['Hanging Leg Raise', 'Cable Crunch', 'Ab Wheel', 'Russian Twist', 'Dragon Flag'],
+      },
+    ],
+  },
+  {
+    id: 6,
+    name: 'Cardio & Endurance',
+    accentColor: '#00d2ff', // Sky Blue
+    groups: [
+      {
+        name: 'Cardio',
+        count: 3,
+        pool: ['Running (Treadmill)', 'Cycling', 'Elliptical', 'Rowing Machine', 'Stair Climber', 'Swimming', 'Jump Rope', 'HIIT Session'],
       },
     ],
   },

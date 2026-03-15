@@ -92,9 +92,19 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ history }) => {
                             <div className="flex flex-wrap gap-2">
                               {ex.sets.map((s, si) => (
                                 <div key={si} className="bg-[var(--surface)] px-2 py-1 rounded-lg flex items-center gap-1.5 border border-[var(--outline)]/10">
-                                  <span className="text-[10px] font-bold text-[var(--primary)]">{s.weight}{s.isLbs ? 'lb' : 'kg'}</span>
-                                  <span className="text-[8px] font-bold text-[var(--outline)]">×</span>
-                                  <span className="text-[10px] font-bold text-[var(--text)]">{s.reps}</span>
+                                  {ex.muscleGroup === 'Cardio' ? (
+                                    <>
+                                      <span className="text-[10px] font-bold text-[var(--primary)]">{s.duration ? (s.duration / 60).toFixed(1) : 0}m</span>
+                                      <span className="text-[8px] font-bold text-[var(--outline)]">|</span>
+                                      <span className="text-[10px] font-bold text-[var(--text)]">{s.distance || 0}km</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span className="text-[10px] font-bold text-[var(--primary)]">{s.weight}{s.isLbs ? 'lb' : 'kg'}</span>
+                                      <span className="text-[8px] font-bold text-[var(--outline)]">×</span>
+                                      <span className="text-[10px] font-bold text-[var(--text)]">{s.reps}</span>
+                                    </>
+                                  )}
                                 </div>
                               ))}
                             </div>
