@@ -16,12 +16,14 @@ import {
   Scale,
   Activity,
   Utensils,
-  Home
+  Home,
+  Menu
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { View, WorkoutDay, CompletedWorkout, PersonalRecord, ActiveExercise, BodyMetrics as BodyMetricsType, MealLog, CardioLog, DailyGoals, CardioWorkout } from './types';
 import { WORKOUT_SPLIT, CARDIO_ROUTINES } from './constants';
 import { getStorageData, saveStorageData, DEFAULT_GOALS } from './utils';
+import { auth, onAuthStateChanged, signOut } from './firebase';
 import { Calendar } from './components/Calendar';
 import { WorkoutCard } from './components/WorkoutCard';
 import { ActiveWorkout } from './components/ActiveWorkout';
@@ -35,6 +37,9 @@ import { CardioView } from './components/CardioView';
 import { MealTracker } from './components/MealTracker';
 import { DailyProgress } from './components/DailyProgress';
 import { GoalEditor } from './components/GoalEditor';
+import { Sidebar } from './components/Sidebar';
+import { Profile } from './components/Profile';
+import { Tutorial } from './components/Tutorial';
 
 export default function App() {
   const [view, setView] = useState<View>('home');
@@ -52,6 +57,8 @@ export default function App() {
   const [customCardioWorkouts, setCustomCardioWorkouts] = useState<CardioWorkout[]>([]);
   const [showGoalEditor, setShowGoalEditor] = useState(false);
   const [showCreateWorkout, setShowCreateWorkout] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const [newExerciseName, setNewExerciseName] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem('gym_dark_mode');
@@ -92,6 +99,13 @@ export default function App() {
     const hasToday = data.gymDays.includes(today);
     const hasYesterday = data.gymDays.includes(yesterday);
     setStreak(hasToday || hasYesterday ? 12 : 0);
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -228,6 +242,15 @@ export default function App() {
     saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, newLogs, activeWorkout, activeExercises, dailyGoals, customCardioWorkouts);
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setView('home');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
   const handleDeleteCardio = (id: string) => {
     const newLogs = cardioLogs.filter(l => l.id !== id);
     setCardioLogs(newLogs);
@@ -264,9 +287,24 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[var(--bg)] flex flex-col text-[var(--text)] transition-colors duration-300">
+      <Sidebar 
+        isOpen={isSidebarOpen} 
+        onClose={() => setIsSidebarOpen(false)} 
+        currentView={view} 
+        onNavigate={setView} 
+        user={user}
+        onLogout={handleLogout}
+      />
+
       {/* Google Style Header */}
       <header className="sticky top-0 z-20 bg-[var(--bg)]/80 backdrop-blur-xl border-b border-[var(--outline)]/10 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setIsSidebarOpen(true)}
+            className="p-2 -ml-2 rounded-full hover:bg-[var(--surface-container)] text-[var(--outline)] active:scale-95 transition-all"
+          >
+            <Menu size={24} />
+          </button>
           <div className="w-10 h-10 rounded-full bg-[var(--primary)] flex items-center justify-center shadow-md">
             <Dumbbell size={22} className="text-[var(--on-primary)]" />
           </div>
@@ -475,6 +513,28 @@ export default function App() {
               exit={{ opacity: 0, y: -10 }}
             >
               <MealTracker logs={mealLogs} onSave={handleSaveMeal} onDelete={handleDeleteMeal} />
+            </motion.div>
+          )}
+
+          {view === 'profile' && (
+            <motion.div
+              key="profile"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <Profile user={user} onLogin={() => {}} />
+            </motion.div>
+          )}
+
+          {view === 'tutorial' && (
+            <motion.div
+              key="tutorial"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <Tutorial />
             </motion.div>
           )}
         </AnimatePresence>

@@ -1,0 +1,95 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Stores user settings and profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "dailyGoals": { "$ref": "DailyGoals" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "DailyGoals": {
+      "title": "Daily Goals",
+      "description": "User's daily fitness and nutrition targets",
+      "type": "object",
+      "properties": {
+        "caloriesBurned": { "type": "number" },
+        "caloriesConsumed": { "type": "number" },
+        "protein": { "type": "number" },
+        "carbs": { "type": "number" },
+        "fats": { "type": "number" }
+      }
+    },
+    "WorkoutLog": {
+      "title": "Workout Log",
+      "description": "A completed strength training session",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "workoutName": { "type": "string" },
+        "duration": { "type": "number" },
+        "exercises": { "type": "array" }
+      },
+      "required": ["id", "userId", "date", "workoutName"]
+    },
+    "CardioLog": {
+      "title": "Cardio Log",
+      "description": "A completed cardio session",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "exerciseName": { "type": "string" },
+        "duration": { "type": "number" },
+        "distance": { "type": "number" },
+        "speed": { "type": "number" },
+        "calories": { "type": "number" },
+        "notes": { "type": "string" }
+      },
+      "required": ["id", "userId", "date", "exerciseName"]
+    },
+    "MealLog": {
+      "title": "Meal Log",
+      "description": "A logged meal or food item",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "name": { "type": "string" },
+        "calories": { "type": "number" },
+        "protein": { "type": "number" },
+        "carbs": { "type": "number" },
+        "fats": { "type": "number" }
+      },
+      "required": ["id", "userId", "date", "name"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile and settings"
+    },
+    "/workouts/{workoutId}": {
+      "schema": "WorkoutLog",
+      "description": "Strength training logs"
+    },
+    "/cardio/{cardioId}": {
+      "schema": "CardioLog",
+      "description": "Cardio session logs"
+    },
+    "/meals/{mealId}": {
+      "schema": "MealLog",
+      "description": "Nutrition logs"
+    }
+  }
+}

@@ -38,7 +38,7 @@ export interface SetEntry {
 export interface ActiveExercise {
   id: string;
   name: string;
-  muscleGroup: MuscleGroup;
+  muscleGroup: MuscleGroup | 'Cardio';
   sets: SetEntry[];
   isLbs: boolean;
   targetTime?: number; // in seconds
@@ -84,7 +84,7 @@ export interface DailyGoals {
   fats: number;
 }
 
-export type View = 'home' | 'days' | 'history' | 'prs' | 'active' | 'charts' | 'metrics' | 'cardio' | 'meals' | 'cardio_days';
+export type View = 'home' | 'days' | 'history' | 'prs' | 'active' | 'charts' | 'metrics' | 'cardio' | 'meals' | 'cardio_days' | 'profile' | 'tutorial';
 
 export interface BodyMetrics {
   id: string;
