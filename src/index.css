@@ -38,39 +38,101 @@
   --color-success: #34A853;
   --color-warning: #FBBC05;
   --color-power: #6B5778;
+
+  /* Gamification Gradients */
+  --gradient-primary: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+  --gradient-secondary: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  --gradient-success: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
+  --gradient-xp: linear-gradient(90deg, #F9D423 0%, #FF4E50 100%);
+  --gradient-purple: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 @layer base {
   :root {
     --bg: #F8F9FA;
-    --text: #202124;
+    --text: #1A1C1E;
+    --text-muted: #4A4A4A;
     --surface: #FFFFFF;
-    --surface-container: #F1F3F4;
-    --primary: #4285F4;
+    --surface-container: #E8EAED;
+    --primary: #FF6B6B;
     --on-primary: #FFFFFF;
-    --secondary-container: #E8F0FE;
-    --on-secondary-container: #1967D2;
-    --outline: #DADCE0;
-    --success: #34A853;
-    --energy: #EA4335;
-    --passion: #EA4335;
-    --power: #6B5778;
+    --secondary-container: #FFE8D6;
+    --on-secondary-container: #D35400;
+    --outline: #8E918F;
+    --success: #1E8E3E;
+    --energy: #FF6B6B;
+    --passion: #FF6B6B;
+    --power: #764ba2;
+    --card-radius: 20px;
+    --xp-gradient: linear-gradient(90deg, #F9D423 0%, #FF4E50 100%);
   }
 
   .dark {
-    --bg: #202124;
-    --text: #E8EAED;
-    --surface: #292A2D;
-    --surface-container: #3C4043;
-    --primary: #8AB4F8;
-    --on-primary: #202124;
-    --secondary-container: #3C4043;
-    --on-secondary-container: #D2E3FC;
-    --outline: #5F6368;
-    --success: #81C995;
-    --energy: #F28B82;
-    --passion: #F28B82;
-    --power: #D7AEFB;
+    --bg: #0F172A;
+    --text: #F8FAFC;
+    --text-muted: #94A3B8;
+    --surface: #1E293B;
+    --surface-container: #334155;
+    --primary: #FF8E53;
+    --on-primary: #0F172A;
+    --secondary-container: #451a03;
+    --on-secondary-container: #fdba74;
+    --outline: #475569;
+    --success: #4ade80;
+    --energy: #fb7185;
+    --passion: #fb7185;
+    --power: #a78bfa;
+  }
+
+  .ocean {
+    --bg: #E0F2F1;
+    --text: #004D40;
+    --text-muted: #00695C;
+    --surface: #FFFFFF;
+    --surface-container: #B2DFDB;
+    --primary: #009688;
+    --on-primary: #FFFFFF;
+    --secondary-container: #E0F2F1;
+    --on-secondary-container: #004D40;
+    --outline: #4DB6AC;
+    --success: #2E7D32;
+    --energy: #009688;
+    --passion: #009688;
+    --power: #00695C;
+  }
+
+  .red {
+    --bg: #FFF5F5;
+    --text: #702459;
+    --text-muted: #822727;
+    --surface: #FFFFFF;
+    --surface-container: #FED7D7;
+    --primary: #E53E3E;
+    --on-primary: #FFFFFF;
+    --secondary-container: #FFF5F5;
+    --on-secondary-container: #C53030;
+    --outline: #E53E3E;
+    --success: #38A169;
+    --energy: #E53E3E;
+    --passion: #E53E3E;
+    --power: #9B2C2C;
+  }
+
+  .pink {
+    --bg: #FFF5F7;
+    --text: #702459;
+    --text-muted: #97266D;
+    --surface: #FFFFFF;
+    --surface-container: #FED7E2;
+    --primary: #ED64A6;
+    --on-primary: #FFFFFF;
+    --secondary-container: #FFF5F7;
+    --on-secondary-container: #D53F8C;
+    --outline: #ED64A6;
+    --success: #48BB78;
+    --energy: #ED64A6;
+    --passion: #ED64A6;
+    --power: #97266D;
   }
 
   body {
@@ -78,12 +140,24 @@
   }
 }
 
+.gamified-card {
+  @apply bg-[var(--surface)] rounded-[var(--card-radius)] p-5 shadow-sm border border-[var(--outline)]/30 transition-all duration-300 hover:shadow-lg hover:border-[var(--outline)]/60 active:scale-[0.98];
+}
+
+.xp-bar-container {
+  @apply h-3 w-full bg-[var(--surface-container)] rounded-full overflow-hidden border border-[var(--outline)]/5;
+}
+
+.xp-bar-fill {
+  @apply h-full bg-[var(--xp-gradient)] transition-all duration-500 ease-out;
+}
+
 .m3-card {
-  @apply bg-[var(--surface-container)] rounded-[28px] p-4 transition-all duration-200;
+  @apply bg-[var(--surface-container)] rounded-[var(--card-radius)] p-4 transition-all duration-200;
 }
 
 .m3-card-elevated {
-  @apply bg-[var(--surface)] rounded-[28px] p-4 shadow-md transition-all duration-200;
+  @apply bg-[var(--surface)] rounded-[var(--card-radius)] p-4 shadow-md transition-all duration-200;
 }
 
 .m3-button-primary {

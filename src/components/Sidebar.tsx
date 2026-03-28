@@ -9,7 +9,9 @@ import {
   LogOut, 
   X,
   Home,
-  ChevronRight
+  ChevronRight,
+  Smartphone,
+  TrendingUp
 } from 'lucide-react';
 import { View } from '../types';
 
@@ -32,10 +34,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const menuItems = [
     { id: 'home', label: 'Dashboard', icon: Home },
-    { id: 'workout', label: 'Workouts', icon: Dumbbell },
+    { id: 'days', label: 'Workouts', icon: Dumbbell },
     { id: 'cardio', label: 'Cardio', icon: Activity },
     { id: 'meals', label: 'Nutrition', icon: Utensils },
-    { id: 'progress', label: 'Progress', icon: Activity },
+    { id: 'progress_deck', label: 'Progress Deck', icon: TrendingUp },
+    { id: 'charts', label: 'Analytics', icon: Activity },
+    { id: 'metrics', label: 'Body Metrics', icon: Activity },
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'tutorial', label: 'Tutorial', icon: HelpCircle },
   ];
@@ -64,8 +68,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {/* Header */}
             <div className="p-6 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[var(--primary)] flex items-center justify-center text-white shadow-lg shadow-[var(--primary)]/20">
-                  <Dumbbell size={24} />
+                <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-[var(--primary)]/20 border border-[var(--primary)]/20">
+                  <img 
+                    src="https://raw.githubusercontent.com/helstan/My-gmy-log-/main/ChatGPT%20Image%20Mar%2028%2C%202026%2C%2011_53_24%20PM.png" 
+                    alt="GymFlow Logo" 
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
                 </div>
                 <div>
                   <h2 className="text-lg font-bold text-[var(--text)] tracking-tight">GymFlow</h2>
@@ -120,6 +129,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </button>
                 );
               })}
+
+              <div className="pt-4 mt-4 border-t border-[var(--outline)]/5">
+                <button
+                  onClick={() => {
+                    onNavigate('connect');
+                    onClose();
+                  }}
+                  className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-[var(--primary)] hover:bg-[var(--primary)]/10 transition-all font-bold text-sm"
+                >
+                  <Smartphone size={20} />
+                  <span>Connect Devices</span>
+                </button>
+              </div>
             </nav>
 
             {/* Footer */}

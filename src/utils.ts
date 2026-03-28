@@ -7,7 +7,8 @@ import {
   MealLog, 
   CardioLog,
   DailyGoals,
-  CardioWorkout
+  CardioWorkout,
+  UserProfile
 } from './types';
 import { WORKOUT_SPLIT } from './constants';
 
@@ -17,6 +18,18 @@ export const DEFAULT_GOALS: DailyGoals = {
   protein: 150,
   carbs: 250,
   fats: 70
+};
+
+export const DEFAULT_USER_PROFILE: UserProfile = {
+  uid: 'demo-user',
+  displayName: 'Helstan',
+  email: 'helstan@example.com',
+  level: 5,
+  xp: 450,
+  streak: 12,
+  achievements: [],
+  photoURL: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Helstan',
+  mood: 'happy'
 };
 
 export const generateDemoData = () => {
@@ -90,7 +103,7 @@ export const generateDemoData = () => {
 
   prs.sort((a, b) => b.bestVolume - a.bestVolume);
 
-  return { history: history.reverse(), prs, gymDays };
+  return { history: history.reverse(), prs, gymDays, userProfile: DEFAULT_USER_PROFILE };
 };
 
 export interface StorageData {
@@ -106,6 +119,7 @@ export interface StorageData {
   activeExercises?: ActiveExercise[];
   dailyGoals: DailyGoals;
   customCardioWorkouts: CardioWorkout[];
+  userProfile: UserProfile;
 }
 
 export const getStorageData = (): StorageData => {
@@ -121,6 +135,7 @@ export const getStorageData = (): StorageData => {
   const activeExercises = localStorage.getItem('gym_active_exercises');
   const dailyGoals = localStorage.getItem('gym_daily_goals');
   const customCardioWorkouts = localStorage.getItem('gym_custom_cardio_workouts');
+  const userProfile = localStorage.getItem('gym_user_profile');
 
   // Only generate demo data if history is completely empty/missing
   if (!history) {
@@ -135,13 +150,14 @@ export const getStorageData = (): StorageData => {
       activeWorkout: null,
       activeExercises: [],
       dailyGoals: DEFAULT_GOALS,
-      customCardioWorkouts: []
+      customCardioWorkouts: [],
+      userProfile: DEFAULT_USER_PROFILE
     };
     saveStorageData(
       initialData.history, 
       initialData.prs, 
       initialData.gymDays, 
-      [], [], [], [], [], null, [], DEFAULT_GOALS, []
+      [], [], [], [], [], null, [], DEFAULT_GOALS, [], DEFAULT_USER_PROFILE
     );
     return initialData;
   }
@@ -158,8 +174,17 @@ export const getStorageData = (): StorageData => {
     activeWorkout: activeWorkout ? JSON.parse(activeWorkout) : null,
     activeExercises: activeExercises ? JSON.parse(activeExercises) : [],
     dailyGoals: dailyGoals ? JSON.parse(dailyGoals) : DEFAULT_GOALS,
-    customCardioWorkouts: customCardioWorkouts ? JSON.parse(customCardioWorkouts) : []
+    customCardioWorkouts: customCardioWorkouts ? JSON.parse(customCardioWorkouts) : [],
+    userProfile: userProfile ? JSON.parse(userProfile) : DEFAULT_USER_PROFILE
   };
+};
+
+export const clearStorageData = () => {
+  const theme = localStorage.getItem('gym_theme');
+  localStorage.clear();
+  if (theme) {
+    localStorage.setItem('gym_theme', theme);
+  }
 };
 
 export const saveStorageData = (
@@ -174,7 +199,8 @@ export const saveStorageData = (
   activeWorkout: any = null,
   activeExercises: any[] = [],
   dailyGoals: DailyGoals = DEFAULT_GOALS,
-  customCardioWorkouts: CardioWorkout[] = []
+  customCardioWorkouts: CardioWorkout[] = [],
+  userProfile: UserProfile = DEFAULT_USER_PROFILE
 ) => {
   localStorage.setItem('gym_history', JSON.stringify(history));
   localStorage.setItem('gym_prs', JSON.stringify(prs));
@@ -188,4 +214,5 @@ export const saveStorageData = (
   localStorage.setItem('gym_active_exercises', JSON.stringify(activeExercises));
   localStorage.setItem('gym_daily_goals', JSON.stringify(dailyGoals));
   localStorage.setItem('gym_custom_cardio_workouts', JSON.stringify(customCardioWorkouts));
+  localStorage.setItem('gym_user_profile', JSON.stringify(userProfile));
 };

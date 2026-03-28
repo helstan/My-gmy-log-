@@ -1,5 +1,5 @@
 {
-  "name": "Helstan's Gym Log",
-  "description": "A Google-inspired, mobile-friendly gym tracker with light/dark mode, workout splits, cardio support, and body metrics tracking.",
+  "name": "GymFlow",
+  "description": "A premium, gamified fitness tracker with workout splits, cardio support, nutrition logging, and visual analytics.",
   "requestFramePermissions": []
 }

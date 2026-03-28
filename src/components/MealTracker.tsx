@@ -1,21 +1,29 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Utensils, Plus, History, Trash2, PieChart, Flame, Beef, Wheat, Droplets } from 'lucide-react';
-import { MealLog } from '../types';
+import { MealLog, DailyGoals } from '../types';
 
 interface MealTrackerProps {
   logs: MealLog[];
+  goals: DailyGoals;
   onSave: (log: MealLog) => void;
   onDelete: (id: string) => void;
+  onUpdateGoals?: (goals: Partial<DailyGoals>) => void;
 }
 
-export const MealTracker: React.FC<MealTrackerProps> = ({ logs, onSave, onDelete }) => {
+export const MealTracker: React.FC<MealTrackerProps> = ({ logs, goals, onSave, onDelete, onUpdateGoals }) => {
   const [showAdd, setShowAdd] = useState(false);
+  const [showEditGoals, setShowEditGoals] = useState(false);
   const [name, setName] = useState('');
   const [calories, setCalories] = useState('');
   const [protein, setProtein] = useState('');
   const [carbs, setCarbs] = useState('');
   const [fats, setFats] = useState('');
+
+  const [goalCals, setGoalCals] = useState(goals.caloriesConsumed.toString());
+  const [goalProt, setGoalProt] = useState(goals.protein.toString());
+  const [goalCarbs, setGoalCarbs] = useState(goals.carbs.toString());
+  const [goalFats, setGoalFats] = useState(goals.fats.toString());
 
   const handleSave = () => {
     if (!name || !calories) return;
@@ -37,6 +45,16 @@ export const MealTracker: React.FC<MealTrackerProps> = ({ logs, onSave, onDelete
     setCarbs('');
     setFats('');
     setShowAdd(false);
+  };
+
+  const handleSaveGoals = () => {
+    onUpdateGoals?.({
+      caloriesConsumed: parseFloat(goalCals) || 2500,
+      protein: parseFloat(goalProt) || 150,
+      carbs: parseFloat(goalCarbs) || 300,
+      fats: parseFloat(goalFats) || 80
+    });
+    setShowEditGoals(false);
   };
 
   const today = new Date().toISOString().split('T')[0];
@@ -68,12 +86,20 @@ export const MealTracker: React.FC<MealTrackerProps> = ({ logs, onSave, onDelete
           </div>
           <h2 className="text-3xl font-bold text-[var(--text)] tracking-tight">Meal Tracker</h2>
         </div>
-        <button 
-          onClick={() => setShowAdd(!showAdd)}
-          className="w-12 h-12 rounded-2xl bg-[#FBBC05] text-white flex items-center justify-center shadow-lg active:scale-95 transition-all"
-        >
-          <Plus size={28} className={`transition-transform duration-300 ${showAdd ? 'rotate-45' : ''}`} />
-        </button>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => setShowEditGoals(!showEditGoals)}
+            className="w-12 h-12 rounded-2xl bg-[var(--surface-container)] text-[var(--text)] flex items-center justify-center shadow-md active:scale-95 transition-all border border-[var(--outline)]/10"
+          >
+            <PieChart size={24} className={showEditGoals ? 'text-[#FBBC05]' : ''} />
+          </button>
+          <button 
+            onClick={() => setShowAdd(!showAdd)}
+            className="w-12 h-12 rounded-2xl bg-[#FBBC05] text-white flex items-center justify-center shadow-lg active:scale-95 transition-all"
+          >
+            <Plus size={28} className={`transition-transform duration-300 ${showAdd ? 'rotate-45' : ''}`} />
+          </button>
+        </div>
       </header>
 
       <div className="grid grid-cols-1 gap-3">
@@ -111,13 +137,13 @@ export const MealTracker: React.FC<MealTrackerProps> = ({ logs, onSave, onDelete
                   strokeWidth="8"
                   strokeDasharray={251.2}
                   initial={{ strokeDashoffset: 251.2 }}
-                  animate={{ strokeDashoffset: 251.2 - (Math.min(totals.calories / 2500, 1) * 251.2) }}
+                  animate={{ strokeDashoffset: 251.2 - (Math.min(totals.calories / goals.caloriesConsumed, 1) * 251.2) }}
                   strokeLinecap="round"
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className="text-xl font-bold text-[var(--text)]">{Math.round(totals.calories)}</span>
-                <span className="text-[8px] font-bold text-[var(--outline)] uppercase">kcal</span>
+                <span className="text-[8px] font-bold text-[var(--outline)] uppercase">/ {goals.caloriesConsumed}</span>
               </div>
             </div>
             
@@ -125,12 +151,12 @@ export const MealTracker: React.FC<MealTrackerProps> = ({ logs, onSave, onDelete
               <div className="space-y-1">
                 <div className="flex justify-between text-[10px] font-bold uppercase">
                   <span className="text-[var(--outline)]">Protein</span>
-                  <span className="text-[var(--text)]">{Math.round(totals.protein)}g</span>
+                  <span className="text-[var(--text)]">{Math.round(totals.protein)} / {goals.protein}g</span>
                 </div>
                 <div className="h-1.5 bg-[var(--outline)]/10 rounded-full overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
-                    animate={{ width: `${Math.min((totals.protein / 150) * 100, 100)}%` }}
+                    animate={{ width: `${Math.min((totals.protein / goals.protein) * 100, 100)}%` }}
                     className="h-full bg-[#4285F4]"
                   />
                 </div>
@@ -138,12 +164,12 @@ export const MealTracker: React.FC<MealTrackerProps> = ({ logs, onSave, onDelete
               <div className="space-y-1">
                 <div className="flex justify-between text-[10px] font-bold uppercase">
                   <span className="text-[var(--outline)]">Carbs</span>
-                  <span className="text-[var(--text)]">{Math.round(totals.carbs)}g</span>
+                  <span className="text-[var(--text)]">{Math.round(totals.carbs)} / {goals.carbs}g</span>
                 </div>
                 <div className="h-1.5 bg-[var(--outline)]/10 rounded-full overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
-                    animate={{ width: `${Math.min((totals.carbs / 300) * 100, 100)}%` }}
+                    animate={{ width: `${Math.min((totals.carbs / goals.carbs) * 100, 100)}%` }}
                     className="h-full bg-[#FBBC05]"
                   />
                 </div>
@@ -151,12 +177,12 @@ export const MealTracker: React.FC<MealTrackerProps> = ({ logs, onSave, onDelete
               <div className="space-y-1">
                 <div className="flex justify-between text-[10px] font-bold uppercase">
                   <span className="text-[var(--outline)]">Fats</span>
-                  <span className="text-[var(--text)]">{Math.round(totals.fats)}g</span>
+                  <span className="text-[var(--text)]">{Math.round(totals.fats)} / {goals.fats}g</span>
                 </div>
                 <div className="h-1.5 bg-[var(--outline)]/10 rounded-full overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
-                    animate={{ width: `${Math.min((totals.fats / 80) * 100, 100)}%` }}
+                    animate={{ width: `${Math.min((totals.fats / goals.fats) * 100, 100)}%` }}
                     className="h-full bg-[#34A853]"
                   />
                 </div>
@@ -165,6 +191,65 @@ export const MealTracker: React.FC<MealTrackerProps> = ({ logs, onSave, onDelete
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {showEditGoals && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="m3-card p-6 border border-[var(--outline)]/10 space-y-4">
+              <h3 className="text-sm font-bold text-[var(--text)] uppercase tracking-wider">Daily Macro Goals</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-[var(--outline)] uppercase px-1">Calories</label>
+                  <input 
+                    type="number" 
+                    value={goalCals}
+                    onChange={e => setGoalCals(e.target.value)}
+                    className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#FBBC05]/20"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-[var(--outline)] uppercase px-1">Protein (g)</label>
+                  <input 
+                    type="number" 
+                    value={goalProt}
+                    onChange={e => setGoalProt(e.target.value)}
+                    className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#FBBC05]/20"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-[var(--outline)] uppercase px-1">Carbs (g)</label>
+                  <input 
+                    type="number" 
+                    value={goalCarbs}
+                    onChange={e => setGoalCarbs(e.target.value)}
+                    className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#FBBC05]/20"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-[var(--outline)] uppercase px-1">Fats (g)</label>
+                  <input 
+                    type="number" 
+                    value={goalFats}
+                    onChange={e => setGoalFats(e.target.value)}
+                    className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#FBBC05]/20"
+                  />
+                </div>
+              </div>
+              <button 
+                onClick={handleSaveGoals}
+                className="w-full bg-[#FBBC05] text-white py-3 rounded-xl font-bold uppercase tracking-wider text-xs active:scale-95 transition-all shadow-md"
+              >
+                Update Goals
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {showAdd && (

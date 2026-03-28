@@ -149,6 +149,18 @@ export const WORKOUT_SPLIT: WorkoutDay[] = [
       },
     ],
   },
+  {
+    id: 6,
+    name: 'Isometrics (Static Power)',
+    accentColor: '#00d2ff', // Calm Blue
+    groups: [
+      {
+        name: 'Isometrics',
+        count: 4,
+        pool: ['Plank', 'Wall Sit', 'L-Sit', 'Hollow Body Hold', 'Superman Hold', 'Iron Cross (Isometric)', 'Planche Lean'],
+      },
+    ],
+  },
 ];
 
 export const CARDIO_ROUTINES: any[] = [
@@ -171,3 +183,24 @@ export const CARDIO_ROUTINES: any[] = [
     exercises: [{ name: 'Jump Rope', duration: 600 }, { name: 'Burpees', duration: 300 }]
   }
 ];
+
+export const XP_REWARDS = {
+  WORKOUT_COMPLETE: 250,
+  CARDIO_COMPLETE: 150,
+  LOG_MEAL: 50,
+  DAILY_GOAL_MET: 100,
+  STREAK_BONUS: 20, // per day of streak
+};
+
+export const ACHIEVEMENTS = [
+  { id: 'first_workout', title: 'First Mission', description: 'Complete your first workout', icon: '🎯' },
+  { id: 'streak_3', title: 'Consistency King', description: 'Maintain a 3-day streak', icon: '🔥' },
+  { id: 'heavy_lifter', title: 'Heavy Lifter', description: 'Log a workout with over 1000kg volume', icon: '🏋️' },
+  { id: 'early_bird', title: 'Early Bird', description: 'Complete a workout before 8 AM', icon: '🌅' },
+  { id: 'chef', title: 'Master Chef', description: 'Log 10 meals in a week', icon: '🍳' },
+];
+
+export const LEVELS = Array.from({ length: 50 }, (_, i) => ({
+  level: i + 1,
+  xpRequired: Math.floor(1000 * Math.pow(1.2, i)),
+}));

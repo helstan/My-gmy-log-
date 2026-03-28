@@ -14,6 +14,9 @@ export const BodyMetrics: React.FC<BodyMetricsProps> = ({ metrics, onSave, onDel
   const [height, setHeight] = useState('');
   const [waist, setWaist] = useState('');
   const [hip, setHip] = useState('');
+  const [chest, setChest] = useState('');
+  const [arms, setArms] = useState('');
+  const [legs, setLegs] = useState('');
   const [showAdd, setShowAdd] = useState(false);
 
   const calculateBMI = (w: number, h: number) => {
@@ -32,6 +35,9 @@ export const BodyMetrics: React.FC<BodyMetricsProps> = ({ metrics, onSave, onDel
     const h = parseFloat(height);
     const wa = parseFloat(waist);
     const hi = parseFloat(hip);
+    const ch = parseFloat(chest);
+    const ar = parseFloat(arms);
+    const le = parseFloat(legs);
 
     if (!w || !h) return;
 
@@ -42,6 +48,9 @@ export const BodyMetrics: React.FC<BodyMetricsProps> = ({ metrics, onSave, onDel
       height: h,
       waist: wa || 0,
       hip: hi || 0,
+      chest: ch || 0,
+      arms: ar || 0,
+      legs: le || 0,
       bmi: calculateBMI(w, h),
       waistToHip: calculateWaistToHip(wa, hi)
     };
@@ -51,6 +60,9 @@ export const BodyMetrics: React.FC<BodyMetricsProps> = ({ metrics, onSave, onDel
     setHeight(h.toString()); // Keep height for next time
     setWaist('');
     setHip('');
+    setChest('');
+    setArms('');
+    setLegs('');
     setShowAdd(false);
   };
 
@@ -125,6 +137,36 @@ export const BodyMetrics: React.FC<BodyMetricsProps> = ({ metrics, onSave, onDel
                     className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
                   />
                 </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-[var(--outline)] uppercase px-1">Chest (cm)</label>
+                  <input 
+                    type="number" 
+                    value={chest}
+                    onChange={e => setChest(e.target.value)}
+                    placeholder="100"
+                    className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-[var(--outline)] uppercase px-1">Arms (cm)</label>
+                  <input 
+                    type="number" 
+                    value={arms}
+                    onChange={e => setArms(e.target.value)}
+                    placeholder="35"
+                    className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-[var(--outline)] uppercase px-1">Legs (cm)</label>
+                  <input 
+                    type="number" 
+                    value={legs}
+                    onChange={e => setLegs(e.target.value)}
+                    placeholder="60"
+                    className="w-full bg-[var(--surface-container)] border border-[var(--outline)]/10 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
+                  />
+                </div>
               </div>
               <button 
                 onClick={handleSave}
@@ -181,6 +223,9 @@ export const BodyMetrics: React.FC<BodyMetricsProps> = ({ metrics, onSave, onDel
                   </div>
                   <div className="text-[10px] font-bold text-[var(--outline)] uppercase">
                     {m.weight}kg • {m.height}cm
+                  </div>
+                  <div className="text-[8px] font-bold text-[var(--outline)] opacity-60 uppercase mt-0.5">
+                    C: {m.chest || 0} • A: {m.arms || 0} • L: {m.legs || 0} • W: {m.waist || 0}
                   </div>
                 </div>
               </div>

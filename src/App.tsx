@@ -4,7 +4,6 @@ import {
   History, 
   Trophy, 
   Plus, 
-  Dumbbell, 
   TrendingUp, 
   Sun, 
   Moon, 
@@ -20,9 +19,10 @@ import {
   Menu
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { View, WorkoutDay, CompletedWorkout, PersonalRecord, ActiveExercise, BodyMetrics as BodyMetricsType, MealLog, CardioLog, DailyGoals, CardioWorkout } from './types';
-import { WORKOUT_SPLIT, CARDIO_ROUTINES } from './constants';
-import { getStorageData, saveStorageData, DEFAULT_GOALS } from './utils';
+import confetti from 'canvas-confetti';
+import { View, WorkoutDay, CompletedWorkout, PersonalRecord, ActiveExercise, BodyMetrics as BodyMetricsType, MealLog, CardioLog, DailyGoals, CardioWorkout, UserProfile } from './types';
+import { WORKOUT_SPLIT, CARDIO_ROUTINES, XP_REWARDS } from './constants';
+import { getStorageData, saveStorageData, clearStorageData, DEFAULT_GOALS, DEFAULT_USER_PROFILE } from './utils';
 import { auth, onAuthStateChanged, signOut } from './firebase';
 import { Calendar } from './components/Calendar';
 import { WorkoutCard } from './components/WorkoutCard';
@@ -40,9 +40,18 @@ import { GoalEditor } from './components/GoalEditor';
 import { Sidebar } from './components/Sidebar';
 import { Profile } from './components/Profile';
 import { Tutorial } from './components/Tutorial';
+import { ConnectView } from './components/ConnectView';
+import { ProgressSlideDeck } from './components/ProgressSlideDeck';
 
 export default function App() {
   const [view, setView] = useState<View>('home');
+  const [theme, setTheme] = useState<'light' | 'dark' | 'ocean' | 'red' | 'pink'>(() => {
+    return (localStorage.getItem('gym_theme') as any) || 'dark';
+  });
+  const [workoutSplit, setWorkoutSplit] = useState<WorkoutDay[]>(() => {
+    const saved = localStorage.getItem('workout_split_order');
+    return saved ? JSON.parse(saved) : WORKOUT_SPLIT;
+  });
   const [history, setHistory] = useState<CompletedWorkout[]>([]);
   const [prs, setPrs] = useState<PersonalRecord[]>([]);
   const [gymDays, setGymDays] = useState<string[]>([]);
@@ -65,9 +74,7 @@ export default function App() {
     return saved ? JSON.parse(saved) : false;
   });
 
-  const [xp, setXp] = useState(0);
-  const [level, setLevel] = useState(1);
-  const [streak, setStreak] = useState(0);
+  const [userProfile, setUserProfile] = useState<UserProfile>(DEFAULT_USER_PROFILE);
 
   useEffect(() => {
     const data = getStorageData();
@@ -83,22 +90,11 @@ export default function App() {
     setActiveExercises(data.activeExercises || []);
     setDailyGoals(data.dailyGoals || DEFAULT_GOALS);
     setCustomCardioWorkouts(data.customCardioWorkouts || []);
+    setUserProfile(data.userProfile || DEFAULT_USER_PROFILE);
     
     if (data.activeWorkout) {
       setView('active');
     }
-    
-    // Calculate XP and Level based on history
-    const totalXp = data.history.length * 100;
-    setXp(totalXp % 1000);
-    setLevel(Math.floor(totalXp / 1000) + 1);
-    
-    // Simple streak calculation
-    const today = new Date().toISOString().split('T')[0];
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-    const hasToday = data.gymDays.includes(today);
-    const hasYesterday = data.gymDays.includes(yesterday);
-    setStreak(hasToday || hasYesterday ? 12 : 0);
   }, []);
 
   useEffect(() => {
@@ -109,17 +105,48 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('gym_dark_mode', JSON.stringify(isDarkMode));
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDarkMode]);
+    localStorage.setItem('gym_theme', theme);
+    document.documentElement.className = theme;
+  }, [theme]);
+
+  const moveWorkout = (id: string | number, direction: 'up' | 'down') => {
+    const index = workoutSplit.findIndex(w => w.id === id);
+    if (index === -1) return;
+    const newSplit = [...workoutSplit];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= newSplit.length) return;
+    [newSplit[index], newSplit[newIndex]] = [newSplit[newIndex], newSplit[index]];
+    setWorkoutSplit(newSplit);
+    localStorage.setItem('workout_split_order', JSON.stringify(newSplit));
+  };
+
+  const updateXP = (amount: number) => {
+    setUserProfile(prev => {
+      let newXP = prev.xp + amount;
+      let newLevel = prev.level;
+      
+      // Simple level up logic: 1000 XP per level
+      while (newXP >= 1000) {
+        newXP -= 1000;
+        newLevel += 1;
+        // Level up effect
+        confetti({
+          particleCount: 150,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#A855F7', '#3B82F6', '#10B981']
+        });
+      }
+
+      const updated = { ...prev, xp: newXP, level: newLevel, mood: 'happy' as const };
+      saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, cardioLogs, activeWorkout, activeExercises, dailyGoals, customCardioWorkouts, updated);
+      return updated;
+    });
+  };
 
   const handleSaveGoals = (goals: DailyGoals) => {
     setDailyGoals(goals);
-    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, cardioLogs, activeWorkout, activeExercises, goals, customCardioWorkouts);
+    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, cardioLogs, activeWorkout, activeExercises, goals, customCardioWorkouts, userProfile);
     setShowGoalEditor(false);
   };
 
@@ -128,19 +155,19 @@ export default function App() {
       ? gymDays.filter(d => d !== date)
       : [...gymDays, date];
     setGymDays(newGymDays);
-    saveStorageData(history, prs, newGymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, cardioLogs, activeWorkout, activeExercises, dailyGoals, customCardioWorkouts);
+    saveStorageData(history, prs, newGymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, cardioLogs, activeWorkout, activeExercises, dailyGoals, customCardioWorkouts, userProfile);
   };
 
   const handleStartWorkout = (workout: WorkoutDay) => {
     setActiveWorkout(workout);
     setActiveExercises([]);
     setView('active');
-    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, cardioLogs, workout, [], dailyGoals, customCardioWorkouts);
+    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, cardioLogs, workout, [], dailyGoals, customCardioWorkouts, userProfile);
   };
 
   const handleActiveWorkoutUpdate = (exercises: ActiveExercise[]) => {
     setActiveExercises(exercises);
-    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, cardioLogs, activeWorkout, exercises, dailyGoals, customCardioWorkouts);
+    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, cardioLogs, activeWorkout, exercises, dailyGoals, customCardioWorkouts, userProfile);
   };
 
   const handleFinishWorkout = (exercises: ActiveExercise[], duration: number, notes: string, photo?: string) => {
@@ -182,21 +209,32 @@ export default function App() {
     setGymDays(newGymDays);
     setActiveWorkout(null);
     setActiveExercises([]);
-    saveStorageData(newHistory, newPrs, newGymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, cardioLogs, null, [], dailyGoals, customCardioWorkouts);
+    
+    // Award XP
+    updateXP(XP_REWARDS.WORKOUT_COMPLETE);
+    
+    // Confetti for workout completion
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+
+    saveStorageData(newHistory, newPrs, newGymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, cardioLogs, null, [], dailyGoals, customCardioWorkouts, userProfile);
     setView('history');
   };
 
   const handleAddCustomWorkout = (workout: WorkoutDay) => {
     const newCustom = [...customWorkouts, workout];
     setCustomWorkouts(newCustom);
-    saveStorageData(history, prs, gymDays, newCustom, customExercises, bodyMetrics, mealLogs, cardioLogs, activeWorkout, activeExercises, dailyGoals, customCardioWorkouts);
+    saveStorageData(history, prs, gymDays, newCustom, customExercises, bodyMetrics, mealLogs, cardioLogs, activeWorkout, activeExercises, dailyGoals, customCardioWorkouts, userProfile);
   };
 
   const handleAddCustomExercise = () => {
     if (!newExerciseName) return;
     const newCustom = [...customExercises, newExerciseName];
     setCustomExercises(newCustom);
-    saveStorageData(history, prs, gymDays, customWorkouts, newCustom, bodyMetrics, mealLogs, cardioLogs, activeWorkout, activeExercises, dailyGoals, customCardioWorkouts);
+    saveStorageData(history, prs, gymDays, customWorkouts, newCustom, bodyMetrics, mealLogs, cardioLogs, activeWorkout, activeExercises, dailyGoals, customCardioWorkouts, userProfile);
     setNewExerciseName('');
   };
 
@@ -215,37 +253,58 @@ export default function App() {
   const handleSaveMetrics = (m: BodyMetricsType) => {
     const newMetrics = [m, ...bodyMetrics];
     setBodyMetrics(newMetrics);
-    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, newMetrics, mealLogs, cardioLogs, activeWorkout, activeExercises, dailyGoals, customCardioWorkouts);
+    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, newMetrics, mealLogs, cardioLogs, activeWorkout, activeExercises, dailyGoals, customCardioWorkouts, userProfile);
   };
 
   const handleDeleteMetrics = (id: string) => {
     const newMetrics = bodyMetrics.filter(m => m.id !== id);
     setBodyMetrics(newMetrics);
-    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, newMetrics, mealLogs, cardioLogs, activeWorkout, activeExercises, dailyGoals, customCardioWorkouts);
+    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, newMetrics, mealLogs, cardioLogs, activeWorkout, activeExercises, dailyGoals, customCardioWorkouts, userProfile);
   };
 
   const handleSaveMeal = (log: MealLog) => {
     const newLogs = [log, ...mealLogs];
     setMealLogs(newLogs);
-    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, newLogs, cardioLogs, activeWorkout, activeExercises, dailyGoals, customCardioWorkouts);
+    updateXP(XP_REWARDS.LOG_MEAL);
+    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, newLogs, cardioLogs, activeWorkout, activeExercises, dailyGoals, customCardioWorkouts, userProfile);
   };
 
   const handleDeleteMeal = (id: string) => {
     const newLogs = mealLogs.filter(l => l.id !== id);
     setMealLogs(newLogs);
-    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, newLogs, cardioLogs, activeWorkout, activeExercises, dailyGoals, customCardioWorkouts);
+    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, newLogs, cardioLogs, activeWorkout, activeExercises, dailyGoals, customCardioWorkouts, userProfile);
   };
 
   const handleSaveCardio = (log: CardioLog) => {
     const newLogs = [log, ...cardioLogs];
     setCardioLogs(newLogs);
-    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, newLogs, activeWorkout, activeExercises, dailyGoals, customCardioWorkouts);
+    updateXP(XP_REWARDS.CARDIO_COMPLETE);
+    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, newLogs, activeWorkout, activeExercises, dailyGoals, customCardioWorkouts, userProfile);
+  };
+
+  const handleClearLogs = () => {
+    setHistory([]);
+    setPrs([]);
+    setBodyMetrics([]);
+    setMealLogs([]);
+    setCardioLogs([]);
+    setActiveWorkout(null);
+    setActiveExercises([]);
+    saveStorageData([], [], gymDays, customWorkouts, customExercises, [], [], [], null, [], dailyGoals, customCardioWorkouts, userProfile);
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#EA4335', '#FBBC05', '#34A853', '#4285F4']
+    });
   };
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      setView('home');
+      // Also reset local data as requested
+      clearStorageData();
+      window.location.reload(); // Simplest way to reset all state
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -254,7 +313,7 @@ export default function App() {
   const handleDeleteCardio = (id: string) => {
     const newLogs = cardioLogs.filter(l => l.id !== id);
     setCardioLogs(newLogs);
-    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, newLogs, activeWorkout, activeExercises, dailyGoals, customCardioWorkouts);
+    saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, newLogs, activeWorkout, activeExercises, dailyGoals, customCardioWorkouts, userProfile);
   };
 
   const allAvailableExercises = useMemo(() => {
@@ -305,17 +364,22 @@ export default function App() {
           >
             <Menu size={24} />
           </button>
-          <div className="w-10 h-10 rounded-full bg-[var(--primary)] flex items-center justify-center shadow-md">
-            <Dumbbell size={22} className="text-[var(--on-primary)]" />
+          <div className="w-10 h-10 rounded-full overflow-hidden shadow-md border-2 border-[var(--primary)]/20">
+            <img 
+              src="https://raw.githubusercontent.com/helstan/My-gmy-log-/main/ChatGPT%20Image%20Mar%2028%2C%202026%2C%2011_53_24%20PM.png" 
+              alt="GymFlow Logo" 
+              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+            />
           </div>
           <div>
-            <h1 className="text-lg font-bold tracking-tight">Gym Log</h1>
+            <h1 className="text-lg font-bold tracking-tight">GymFlow</h1>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider">Level {level}</span>
+              <span className="text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider">Level {userProfile.level}</span>
               <div className="w-20 h-1.5 bg-[var(--surface-container)] rounded-full overflow-hidden">
                 <motion.div 
                   initial={{ width: 0 }}
-                  animate={{ width: `${(xp / 1000) * 100}%` }}
+                  animate={{ width: `${(userProfile.xp / 1000) * 100}%` }}
                   className="h-full bg-[var(--primary)]"
                 />
               </div>
@@ -323,22 +387,27 @@ export default function App() {
           </div>
         </div>
         
-        <div className="flex items-center gap-2">
-          <button 
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className="p-2 rounded-full bg-[var(--surface-container)] text-[var(--text)] active:scale-95 transition-all"
-          >
-            {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
-          <div className="flex items-center gap-3 bg-[var(--surface-container)] px-3 py-1.5 rounded-full border border-[var(--outline)]/10">
+          <div className="flex items-center gap-2">
+            <select 
+              value={theme}
+              onChange={(e) => setTheme(e.target.value as any)}
+              className="bg-[var(--surface-container)] text-[var(--text)] text-[10px] font-bold uppercase tracking-widest px-2 py-1.5 rounded-full border border-[var(--outline)]/10 focus:outline-none"
+            >
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+              <option value="ocean">Ocean</option>
+              <option value="red">Red</option>
+              <option value="pink">Pink</option>
+            </select>
+            <div className="flex items-center gap-3 bg-[var(--surface-container)] px-3 py-1.5 rounded-full border border-[var(--outline)]/10">
             <div className="flex items-center gap-1">
               <TrendingUp size={14} className="text-[var(--energy)]" />
-              <span className="text-xs font-bold">{streak}</span>
+              <span className="text-xs font-bold">{userProfile.streak}</span>
             </div>
             <div className="w-px h-3 bg-[var(--outline)]/20" />
             <div className="flex items-center gap-1">
               <Trophy size={14} className="text-[var(--power)]" />
-              <span className="text-xs font-bold">{level}</span>
+              <span className="text-xs font-bold">{userProfile.level}</span>
             </div>
           </div>
         </div>
@@ -363,10 +432,13 @@ export default function App() {
               />
               <HomeView 
                 onSelectOption={setView} 
-                userName="Helstan" 
+                userProfile={userProfile}
                 todayMeals={mealLogs.filter(l => l.date.split('T')[0] === new Date().toISOString().split('T')[0])}
                 todayWorkouts={history.filter(l => l.date.split('T')[0] === new Date().toISOString().split('T')[0])}
                 todayCardio={cardioLogs.filter(l => l.date.split('T')[0] === new Date().toISOString().split('T')[0])}
+                workoutSplit={workoutSplit}
+                onMoveWorkout={moveWorkout}
+                onAddCustomWorkout={() => setShowCreateWorkout(true)}
               />
             </motion.div>
           )}
@@ -394,7 +466,7 @@ export default function App() {
                 
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 gap-4">
-                    {WORKOUT_SPLIT.map(workout => (
+                    {workoutSplit.map(workout => (
                       <WorkoutCard key={workout.id} workout={workout} onStart={handleStartWorkout} />
                     ))}
                     {customWorkouts.map(workout => (
@@ -512,7 +584,13 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
             >
-              <MealTracker logs={mealLogs} onSave={handleSaveMeal} onDelete={handleDeleteMeal} />
+              <MealTracker 
+                logs={mealLogs} 
+                goals={dailyGoals}
+                onSave={handleSaveMeal} 
+                onDelete={handleDeleteMeal} 
+                onUpdateGoals={(goals) => setDailyGoals(prev => ({ ...prev, ...goals }))}
+              />
             </motion.div>
           )}
 
@@ -523,7 +601,15 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
             >
-              <Profile user={user} onLogin={() => {}} />
+              <Profile 
+                user={user} 
+                userProfile={userProfile} 
+                onLogin={() => {}} 
+                onLogout={handleLogout}
+                onClearLogs={handleClearLogs}
+                currentTheme={theme}
+                onThemeChange={setTheme}
+              />
             </motion.div>
           )}
 
@@ -535,6 +621,28 @@ export default function App() {
               exit={{ opacity: 0, y: -10 }}
             >
               <Tutorial />
+            </motion.div>
+          )}
+
+          {view === 'connect' && (
+            <motion.div
+              key="connect"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <ConnectView />
+            </motion.div>
+          )}
+
+          {view === 'progress_deck' && (
+            <motion.div
+              key="progress_deck"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <ProgressSlideDeck />
             </motion.div>
           )}
         </AnimatePresence>
@@ -550,7 +658,7 @@ export default function App() {
             if (confirm('Are you sure you want to cancel this workout? Progress will be lost.')) {
               setActiveWorkout(null);
               setActiveExercises([]);
-              saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, cardioLogs, null, [], dailyGoals, customCardioWorkouts);
+              saveStorageData(history, prs, gymDays, customWorkouts, customExercises, bodyMetrics, mealLogs, cardioLogs, null, [], dailyGoals, customCardioWorkouts, userProfile);
               setView('days');
             }
           }}

@@ -84,7 +84,7 @@ export interface DailyGoals {
   fats: number;
 }
 
-export type View = 'home' | 'days' | 'history' | 'prs' | 'active' | 'charts' | 'metrics' | 'cardio' | 'meals' | 'cardio_days' | 'profile' | 'tutorial';
+export type View = 'home' | 'days' | 'history' | 'prs' | 'active' | 'charts' | 'metrics' | 'cardio' | 'meals' | 'cardio_days' | 'profile' | 'tutorial' | 'connect' | 'progress_deck';
 
 export interface BodyMetrics {
   id: string;
@@ -93,6 +93,9 @@ export interface BodyMetrics {
   height: number; // in cm
   waist: number; // in cm
   hip: number; // in cm
+  chest?: number; // in cm
+  arms?: number; // in cm
+  legs?: number; // in cm
   bmi: number;
   waistToHip: number;
 }
@@ -116,4 +119,25 @@ export interface CardioLog {
   duration: number; // in seconds
   calories?: number;
   notes?: string;
+}
+
+export interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  unlockedAt?: string;
+}
+
+export interface UserProfile {
+  uid: string;
+  email: string;
+  displayName: string;
+  photoURL?: string;
+  xp: number;
+  level: number;
+  streak: number;
+  lastActiveDate?: string;
+  mood: 'happy' | 'tired' | 'celebrating' | 'neutral';
+  achievements: string[]; // IDs of unlocked achievements
 }

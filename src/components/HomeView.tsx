@@ -1,145 +1,241 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { motion } from 'motion/react';
-import { Dumbbell, Activity, Utensils, Quote, Flame, Zap, CheckCircle2 } from 'lucide-react';
-import { MOTIVATIONAL_QUOTES } from '../constants';
-import { View, MealLog, CompletedWorkout, CardioLog } from '../types';
+import { Dumbbell, Activity, Utensils, Flame, Zap, Trophy, Target, Heart, ChevronUp, ChevronDown, Plus, TrendingUp } from 'lucide-react';
+import { View, MealLog, CompletedWorkout, CardioLog, UserProfile, WorkoutDay } from '../types';
+import { Avatar } from './Avatar';
+import { XPBar } from './XPBar';
+import { StatCard } from './StatCard';
+import { LEVELS } from '../constants';
 
 interface HomeViewProps {
   onSelectOption: (view: View) => void;
-  userName: string;
+  userProfile: UserProfile;
   todayMeals: MealLog[];
   todayWorkouts: CompletedWorkout[];
   todayCardio: CardioLog[];
+  workoutSplit?: WorkoutDay[];
+  onMoveWorkout?: (id: string | number, direction: 'up' | 'down') => void;
+  onAddCustomWorkout?: () => void;
 }
 
 export const HomeView: React.FC<HomeViewProps> = ({ 
   onSelectOption, 
-  userName, 
+  userProfile, 
   todayMeals, 
   todayWorkouts, 
-  todayCardio 
+  todayCardio,
+  workoutSplit = [],
+  onMoveWorkout,
+  onAddCustomWorkout
 }) => {
-  const quote = useMemo(() => {
-    return MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)];
-  }, []);
-
   const totalCalories = todayMeals.reduce((sum, m) => sum + m.calories, 0);
   const workoutDone = todayWorkouts.length > 0;
   const cardioDone = todayCardio.length > 0;
 
-  const options = [
-    {
-      id: 'days' as View,
-      title: 'Workout',
-      description: 'Strength & Muscle Building',
-      icon: Dumbbell,
-      color: 'bg-[#4285F4]',
-      onColor: 'text-white'
-    },
-    {
-      id: 'cardio' as View,
-      title: 'Cardio',
-      description: 'Endurance & Heart Health',
-      icon: Activity,
-      color: 'bg-[#34A853]',
-      onColor: 'text-white'
-    },
-    {
-      id: 'meals' as View,
-      title: 'Meals',
-      description: 'Nutrition & Macro Tracking',
-      icon: Utensils,
-      color: 'bg-[#FBBC05]',
-      onColor: 'text-white'
-    }
-  ];
+  const currentLevel = userProfile?.level || 1;
+  const nextLevelXP = LEVELS.find(l => l.level === currentLevel)?.xpRequired || 1000;
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
 
   return (
     <div className="space-y-8 py-4">
-      <header className="space-y-2">
-        <motion.h2 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="text-3xl font-bold tracking-tight text-[var(--text)]"
-        >
-          {greeting}, {userName}!
-        </motion.h2>
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="m3-card p-6 bg-[var(--secondary-container)] border border-[var(--outline)]/10 relative overflow-hidden"
-        >
-          <Quote className="absolute -right-4 -top-4 w-24 h-24 text-[var(--on-secondary-container)] opacity-5" />
-          <p className="text-sm font-medium italic text-[var(--on-secondary-container)] leading-relaxed relative z-10">
-            "{quote}"
-          </p>
-        </motion.div>
+      {/* Header with Avatar and Greeting */}
+      <header className="flex items-center gap-4 px-1">
+        <Avatar seed={userProfile?.email || 'guest'} mood={workoutDone ? 'happy' : 'neutral'} size={70} />
+        <div className="flex-1 min-w-0">
+          <h2 className="text-3xl font-black tracking-tight text-[var(--text)] truncate">
+            {greeting}, {userProfile?.displayName?.split(' ')[0] || 'Athlete'}!
+          </h2>
+          <div className="flex items-center gap-2 mt-1">
+            <div className="flex items-center gap-1 bg-[var(--secondary-container)] px-2 py-0.5 rounded-full border border-[var(--outline)]/10">
+              <Flame size={12} className="text-[#FF6B6B]" />
+              <span className="text-[10px] font-black text-[var(--on-secondary-container)] uppercase tracking-widest">
+                {userProfile?.streak || 0} Day Streak
+              </span>
+            </div>
+            <div className="flex items-center gap-1 bg-[var(--surface-container)] px-2 py-0.5 rounded-full border border-[var(--outline)]/10">
+              <Trophy size={12} className="text-[#FBBC05]" />
+              <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">
+                Level {currentLevel}
+              </span>
+            </div>
+          </div>
+        </div>
       </header>
 
-      <div className="grid grid-cols-2 gap-3">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3 }}
-          className="m3-card p-4 bg-[var(--surface-container)] border border-[var(--outline)]/10 flex flex-col justify-between"
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider">Nutrition</span>
-            <Flame size={14} className="text-[#EA4335]" />
-          </div>
-          <div>
-            <span className="text-2xl font-bold text-[var(--text)]">{Math.round(totalCalories)}</span>
-            <span className="text-[10px] font-bold text-[var(--outline)] ml-1">kcal</span>
-          </div>
-        </motion.div>
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.4 }}
-          className="m3-card p-4 bg-[var(--surface-container)] border border-[var(--outline)]/10 flex flex-col justify-between"
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-bold text-[var(--outline)] uppercase tracking-wider">Activity</span>
-            <Zap size={14} className="text-[#FBBC05]" />
-          </div>
-          <div className="flex gap-2">
-            <div className={`w-6 h-6 rounded-full flex items-center justify-center ${workoutDone ? 'bg-[#4285F4] text-white' : 'bg-[var(--outline)]/10 text-[var(--outline)]'}`}>
-              <Dumbbell size={12} />
-            </div>
-            <div className={`w-6 h-6 rounded-full flex items-center justify-center ${cardioDone ? 'bg-[#34A853] text-white' : 'bg-[var(--outline)]/10 text-[var(--outline)]'}`}>
-              <Activity size={12} />
-            </div>
-            {(workoutDone || cardioDone) && (
-              <CheckCircle2 size={14} className="text-[#34A853] ml-auto self-center" />
-            )}
-          </div>
-        </motion.div>
-      </div>
+      {/* XP Progress Section */}
+      <section className="px-1">
+        <XPBar currentXP={userProfile?.xp || 0} requiredXP={nextLevelXP} level={currentLevel} />
+      </section>
 
-      <div className="grid grid-cols-1 gap-4">
-        {options.map((option, idx) => (
+      {/* Daily Goals Grid (Swiggy Style) */}
+      <section className="space-y-4">
+        <h3 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-[0.2em] px-1">Daily Missions</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <StatCard 
+            title="Calories" 
+            value={Math.round(totalCalories)} 
+            unit="kcal" 
+            icon={Flame} 
+            color="var(--gradient-primary)" 
+            progress={Math.min(Math.round((totalCalories / 2500) * 100), 100)}
+          />
+          <StatCard 
+            title="Workouts" 
+            value={todayWorkouts.length} 
+            unit="done" 
+            icon={Dumbbell} 
+            color="var(--gradient-purple)" 
+            progress={workoutDone ? 100 : 0}
+          />
+          <StatCard 
+            title="Cardio" 
+            value={todayCardio.length} 
+            unit="done" 
+            icon={Activity} 
+            color="var(--gradient-success)" 
+            progress={cardioDone ? 100 : 0}
+          />
+          <StatCard 
+            title="Heart Rate" 
+            value={72} 
+            unit="bpm" 
+            icon={Heart} 
+            color="var(--gradient-secondary)" 
+          />
+        </div>
+      </section>
+
+      {/* Quick Actions (Swiggy Style Large Cards) */}
+      <section className="space-y-4">
+        <h3 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-[0.2em] px-1">Start Quest</h3>
+        <div className="space-y-4">
           <motion.button
-            key={option.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 + idx * 0.1 }}
-            onClick={() => onSelectOption(option.id)}
-            className="m3-card p-6 flex items-center gap-6 text-left hover:scale-[1.02] active:scale-[0.98] transition-all border border-[var(--outline)]/10 group"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => onSelectOption('progress_deck')}
+            className="w-full gamified-card flex items-center gap-6 text-left relative overflow-hidden group"
           >
-            <div className={`w-16 h-16 rounded-2xl ${option.color} flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all`}>
-              <option.icon size={32} className={option.onColor} />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--power)]/5 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:scale-110" />
+            <div className="w-16 h-16 rounded-2xl bg-[var(--gradient-purple)] flex items-center justify-center shadow-xl relative z-10">
+              <TrendingUp size={32} className="text-white" />
             </div>
-            <div className="flex-1">
-              <h3 className="text-xl font-bold text-[var(--text)]">{option.title}</h3>
-              <p className="text-sm text-[var(--outline)] font-medium">{option.description}</p>
+            <div className="flex-1 relative z-10">
+              <h3 className="text-xl font-black text-[var(--text)] tracking-tight">Progress Deck</h3>
+              <p className="text-xs text-[var(--text-muted)] font-bold uppercase tracking-widest">Visual Analytics & Trends</p>
             </div>
+            <Target size={24} className="text-[var(--text-muted)] opacity-20" />
           </motion.button>
-        ))}
-      </div>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => onSelectOption('days')}
+            className="w-full gamified-card flex items-center gap-6 text-left relative overflow-hidden group"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--primary)]/5 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:scale-110" />
+            <div className="w-16 h-16 rounded-2xl bg-[var(--gradient-purple)] flex items-center justify-center shadow-xl relative z-10">
+              <Dumbbell size={32} className="text-white" />
+            </div>
+            <div className="flex-1 relative z-10">
+              <h3 className="text-xl font-black text-[var(--text)] tracking-tight">Strength Mission</h3>
+              <p className="text-xs text-[var(--text-muted)] font-bold uppercase tracking-widest">Build Power & Muscle</p>
+            </div>
+            <Target size={24} className="text-[var(--text-muted)] opacity-20" />
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => onSelectOption('cardio')}
+            className="w-full gamified-card flex items-center gap-6 text-left relative overflow-hidden group"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#34A853]/5 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:scale-110" />
+            <div className="w-16 h-16 rounded-2xl bg-[var(--gradient-success)] flex items-center justify-center shadow-xl relative z-10">
+              <Activity size={32} className="text-white" />
+            </div>
+            <div className="flex-1 relative z-10">
+              <h3 className="text-xl font-black text-[var(--text)] tracking-tight">Endurance Quest</h3>
+              <p className="text-xs text-[var(--text-muted)] font-bold uppercase tracking-widest">Boost Heart Health</p>
+            </div>
+            <Target size={24} className="text-[var(--text-muted)] opacity-20" />
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => onSelectOption('meals')}
+            className="w-full gamified-card flex items-center gap-6 text-left relative overflow-hidden group"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#FBBC05]/5 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:scale-110" />
+            <div className="w-16 h-16 rounded-2xl bg-[var(--gradient-primary)] flex items-center justify-center shadow-xl relative z-10">
+              <Utensils size={32} className="text-white" />
+            </div>
+            <div className="flex-1 relative z-10">
+              <h3 className="text-xl font-black text-[var(--text)] tracking-tight">Nutrition Log</h3>
+              <p className="text-xs text-[var(--text-muted)] font-bold uppercase tracking-widest">Track Fuel & Macros</p>
+            </div>
+            <Target size={24} className="text-[var(--text-muted)] opacity-20" />
+          </motion.button>
+        </div>
+      </section>
+
+      {/* Workout Reordering Section */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">Your Missions</h3>
+          <button 
+            onClick={onAddCustomWorkout}
+            className="flex items-center gap-1 text-[10px] font-black text-[var(--primary)] uppercase tracking-widest bg-[var(--secondary-container)] px-3 py-1 rounded-full"
+          >
+            <Plus size={12} /> Custom
+          </button>
+        </div>
+        <div className="space-y-3">
+          {workoutSplit.map((workout, idx) => (
+            <motion.div 
+              key={workout.id} 
+              layout
+              className="gamified-card p-4 flex items-center justify-between group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-lg" style={{ background: workout.accentColor }}>
+                  <Zap size={20} />
+                </div>
+                <div>
+                  <h4 className="text-sm font-black text-[var(--text)]">{workout.name}</h4>
+                  <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider">{workout.groups.length} Groups</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-0.5">
+                  <button 
+                    onClick={() => onMoveWorkout?.(workout.id, 'up')}
+                    disabled={idx === 0}
+                    className="p-1 text-[var(--text-muted)] hover:text-[var(--primary)] disabled:opacity-10 transition-colors"
+                  >
+                    <ChevronUp size={16} />
+                  </button>
+                  <button 
+                    onClick={() => onMoveWorkout?.(workout.id, 'down')}
+                    disabled={idx === workoutSplit.length - 1}
+                    className="p-1 text-[var(--text-muted)] hover:text-[var(--primary)] disabled:opacity-10 transition-colors"
+                  >
+                    <ChevronDown size={16} />
+                  </button>
+                </div>
+                <button 
+                  onClick={() => onSelectOption('days')}
+                  className="w-8 h-8 rounded-lg bg-[var(--surface-container)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--primary)] transition-colors"
+                >
+                  <Target size={16} />
+                </button>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 };

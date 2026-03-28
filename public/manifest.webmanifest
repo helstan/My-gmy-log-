@@ -1,7 +1,7 @@
 {
-  "name": "Helstan's Gym Log",
-  "short_name": "Gym Log",
-  "description": "A dark-themed, mobile-friendly personal gym tracker with workout splits, history, and PR tracking.",
+  "name": "GymFlow | Premium Fitness Log",
+  "short_name": "GymFlow",
+  "description": "A gamified, premium fitness tracker with workout splits, history, and visual analytics.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0502",
@@ -9,13 +9,13 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "https://picsum.photos/seed/gym/192/192",
+      "src": "https://raw.githubusercontent.com/helstan/My-gmy-log-/main/ChatGPT%20Image%20Mar%2028%2C%202026%2C%2011_53_24%20PM.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://picsum.photos/seed/gym/512/512",
+      "src": "https://raw.githubusercontent.com/helstan/My-gmy-log-/main/ChatGPT%20Image%20Mar%2028%2C%202026%2C%2011_53_24%20PM.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
